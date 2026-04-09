@@ -108,6 +108,38 @@
 
   /* PROJECTS */
   #projects { background: var(--bg2); }
+
+  .projects-controls {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 16px; margin-bottom: 32px; flex-wrap: wrap;
+  }
+  .proj-filters { display: flex; gap: 6px; flex-wrap: wrap; }
+  .proj-filter {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 7px 14px; border-radius: 3px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); cursor: pointer; transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .proj-filter:hover { border-color: var(--border-hover); color: var(--text); }
+  .proj-filter.active { border-color: var(--accent); color: var(--accent); background: rgba(108,99,255,0.1); }
+
+  .proj-search {
+    font-family: var(--mono); font-size: 12px; letter-spacing: 0.04em;
+    padding: 7px 14px; border-radius: 3px; border: 1px solid var(--border);
+    background: rgba(255,255,255,0.03); color: var(--text);
+    outline: none; transition: border-color 0.18s; width: 220px;
+  }
+  .proj-search::placeholder { color: var(--muted); opacity: 0.6; }
+  .proj-search:focus { border-color: var(--border-hover); }
+
+  .projects-empty {
+    display: none; grid-column: 1 / -1; text-align: center;
+    padding: 60px 0; font-family: var(--mono); font-size: 12px;
+    color: var(--muted); letter-spacing: 0.08em;
+  }
+  .projects-empty.visible { display: block; }
+
+  .project-card.hidden { display: none; }
   .projects-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
   .project-card {
     background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 28px;
@@ -119,8 +151,7 @@
   .project-card:hover { border-color: var(--border-hover); transform: translateY(-3px); }
   .project-card:hover::before { opacity: 1; }
   .project-card.featured { grid-column: span 2; background: linear-gradient(135deg,var(--card) 0%,rgba(108,99,255,0.06) 100%); }
-  .project-icon { font-size: 28px; line-height: 1; }
-  .project-meta { display: flex; justify-content: space-between; align-items: flex-start; }
+.project-meta { display: flex; justify-content: space-between; align-items: flex-start; }
   .project-type { font-family: var(--mono); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; background: rgba(255,255,255,0.05); color: var(--muted); }
   .project-arrow { color: var(--muted); font-size: 18px; transition: all 0.2s; line-height: 1; }
   .project-card:hover .project-arrow { color: var(--text); transform: translate(2px,-2px); }
@@ -171,8 +202,10 @@
   .modal-section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); margin-bottom: 14px; }
 
   /* Media */
-  .media-slots { display: flex; flex-direction: column; gap: 12px; }
-  .media-slot { width: 100%; border-radius: 8px; border: 1px dashed var(--border-hover); background: rgba(255,255,255,0.02); overflow: hidden; }
+  .media-slots { display: flex; flex-direction: column; gap: 16px; }
+  .media-slot { width: 100%; border-radius: 8px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); overflow: hidden; }
+  .media-slot video { width: 100%; display: block; max-height: 340px; object-fit: contain; background: #000; }
+  .media-caption { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; padding: 10px 14px; border-top: 1px solid var(--border); }
   .media-placeholder { height: 200px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--muted); }
   .media-placeholder .ph-icon { font-size: 26px; opacity: 0.35; }
   .media-placeholder p { font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; opacity: 0.45; text-align: center; line-height: 1.6; }
@@ -284,29 +317,32 @@
   <div class="about-grid fade-in">
     <div class="about-text">
       <p>I'm an undergraduate computer engineering student at George Washington University with a deep focus on <strong>robotics</strong> and <strong>computer vision</strong>. My work spans the full stack — from training neural networks to wiring servos and electrical components.</p>
-      <p>In my research lab, I work on <strong>open-vocabulary obstruction detection for drone package delivery</strong> using YOLO-World deployed on a Jetson Xavier. Outside of lab, I'm currently building: a 6-DOF imitation-learning arm, RL agents in Minecraft, and custom smart home systems.</p>
+      <p>Currently, I work in the Intelligent Aerospace Systems Lab (IASL) at GWU, where my research focuses on <strong>open-vocabulary obstruction detection for drone package delivery</strong> using YOLO-World deployed on a Jetson Xavier. Previously, I have worked on <strong>full-stack web development</strong> and building <strong>autonomous UGV systems</strong> as an intern at C-3 Comm Systems LLC.
+         Outside of work, I'm currently building: a 6-DOF imitation-learning arm, RL agents in Minecraft, and custom smart home systems.
+
+        </p>
     </div>
     <div class="about-stack">
       <div>
         <p class="stack-group-label">ML / AI</p>
         <div class="tags">
-          <span class="tag active">PyTorch</span><span class="tag active">YOLO / YOLO-World</span>
-          <span class="tag">Reinforcement Learning</span><span class="tag">PPO</span>
-          <span class="tag">Imitation Learning</span><span class="tag">TensorFlow</span>
+          <span class="tag active">Reinforcement Learning (SB3)</span><span class="tag active">PyTorch</span>
+          <span class="tag">TensorFlow</span><span class="tag">PPO</span>
+          <!-- <span class="tag">Imitation Learning</span><span class="tag">TensorFlow</span> -->
         </div>
       </div>
       <div>
         <p class="stack-group-label">Robotics</p>
         <div class="tags">
           <span class="tag active">ROS2</span><span class="tag">MoveIt2</span>
-          <span class="tag">Jetson Orin / Xavier</span><span class="tag">ORB-SLAM</span>
-          <span class="tag">Raspberry Pi</span><span class="tag">OpenCV</span>
+          <span class="tag">Jetson Orin / Xavier</span><span class="tag">MuJoCo</span>
+          <span class="tag">Robotic Arm</span><span class="tag">UGV</span>
         </div>
       </div>
       <div>
         <p class="stack-group-label">Languages & Tools</p>
         <div class="tags">
-          <span class="tag active">Python</span><span class="tag">C/C++</span>
+          <span class="tag active">Python</span><span class="tag active">C/C++</span>
           <span class="tag">Java</span><span class="tag">JavaScript</span>
           <span class="tag">Flask / Django</span><span class="tag">React</span>
           <span class="tag">Docker</span><span class="tag">Linux</span>
@@ -321,11 +357,22 @@
 <section id="projects">
   <p class="section-label">Work</p>
   <h2 class="section-title">Projects</h2>
+
+  <div class="projects-controls">
+    <div class="proj-filters">
+      <button class="proj-filter active" data-filter="all" onclick="filterProjects('all',this)">All</button>
+      <button class="proj-filter" data-filter="robotics" onclick="filterProjects('robotics',this)">Robotics</button>
+      <button class="proj-filter" data-filter="cv" onclick="filterProjects('cv',this)">Computer Vision</button>
+      <button class="proj-filter" data-filter="rl" onclick="filterProjects('rl',this)">Reinforcement Learning</button>
+      <button class="proj-filter" data-filter="iot" onclick="filterProjects('iot',this)">IoT</button>
+    </div>
+    <input class="proj-search" type="text" placeholder="Search projects..." oninput="searchProjects(this.value)">
+  </div>
+
   <div class="projects-grid">
 
-    <div class="project-card featured fade-in" style="--card-accent:#6c63ff" onclick="openModal('imitation-arm')">
+    <div class="project-card featured fade-in" data-category="robotics" style="--card-accent:#6c63ff" onclick="openModal('imitation-arm')">
       <div class="project-meta"><span class="project-type">Robotics · Hardware</span><span class="project-arrow">↗</span></div>
-      <div class="project-icon">🦾</div>
       <h3 class="project-title">ImitationArm</h3>
       <p class="project-desc">A 6-DOF robotic arm that learns manipulation from human demonstrations. Wearable IMU controller, ROS2 control stack, gradient-descent IK, and MoveIt2 — built from scratch.</p>
       <div class="project-tags">
@@ -334,9 +381,8 @@
       </div>
     </div>
 
-    <div class="project-card fade-in" style="--card-accent:#00d4aa" onclick="openModal('uas-detection')">
+    <div class="project-card fade-in" data-category="cv" style="--card-accent:#00d4aa" onclick="openModal('uas-detection')">
       <div class="project-meta"><span class="project-type">Research · CV</span><span class="project-arrow">↗</span></div>
-      <div class="project-icon">🚁</div>
       <h3 class="project-title">UAS Landing Zone Detection</h3>
       <p class="project-desc">Fine-tuned YOLO-World for open-vocabulary obstruction detection on drone landing pads. Zero-shot generalization to unseen obstacle classes.</p>
       <div class="project-tags">
@@ -344,9 +390,8 @@
       </div>
     </div>
 
-    <div class="project-card fade-in" style="--card-accent:#f5a623" onclick="openModal('minecraft-rl')">
+    <div class="project-card fade-in" data-category="rl" style="--card-accent:#f5a623" onclick="openModal('minecraft-rl')">
       <div class="project-meta"><span class="project-type">RL · Simulation</span><span class="project-arrow">↗</span></div>
-      <div class="project-icon">🎮</div>
       <h3 class="project-title">Minecraft Parkour RL</h3>
       <p class="project-desc">Created a custom wrapper around Project Malmo, an open source Minecraft simulation enviornment for training RL agents. Training agents to learn advanced navigation techniques such as parkour and bridging.</p>
       <div class="project-tags">
@@ -354,9 +399,8 @@
       </div>
     </div>
 
-    <div class="project-card fade-in" style="--card-accent:#ff6b6b" onclick="openModal('wildfire')">
+    <div class="project-card fade-in" data-category="cv" style="--card-accent:#ff6b6b" onclick="openModal('wildfire')">
       <div class="project-meta"><span class="project-type">CV · Classification</span><span class="project-arrow">↗</span></div>
-      <div class="project-icon">🔥</div>
       <h3 class="project-title">Wildfire Early Detection</h3>
       <p class="project-desc">YOLO-based classification network for early wildfire detection in aerial imagery. Detects smoke and flame signatures across California.</p>
       <div class="project-tags">
@@ -364,15 +408,34 @@
       </div>
     </div>
 
-    <div class="project-card fade-in" style="--card-accent:#00d4aa" onclick="openModal('opencda')">
+    <div class="project-card fade-in" data-category="robotics" style="--card-accent:#00d4aa" onclick="openModal('opencda')">
       <div class="project-meta"><span class="project-type">Simulation · AV</span><span class="project-arrow">↗</span></div>
-      <div class="project-icon">🚗</div>
       <h3 class="project-title">OpenCDA Merging</h3>
       <p class="project-desc">Cooperative driving automation on CARLA + SUMO. Prototyping V2X merging behaviors for autonomous vehicle fleets.</p>
       <div class="project-tags">
         <span class="project-tag">CARLA</span><span class="project-tag">SUMO</span><span class="project-tag">V2X</span><span class="project-tag">OpenCDA</span>
       </div>
     </div>
+
+    <div class="project-card fade-in" data-category="rl" style="--card-accent:#a78bfa" onclick="openModal('rl-gymnasium')">
+      <div class="project-meta"><span class="project-type">RL · Simulation</span><span class="project-arrow">↗</span></div>
+      <h3 class="project-title">RL Gymnasium Agents</h3>
+      <p class="project-desc">PPO agents trained across CarRacing-v3, LunarLander-v3, and Humanoid-v5. Custom reward shaping, domain randomization, and pose perturbation wrappers to reach competitive eval scores.</p>
+      <div class="project-tags">
+        <span class="project-tag">PPO</span><span class="project-tag">Gymnasium</span><span class="project-tag">Stable-Baselines3</span><span class="project-tag">PyTorch</span>
+      </div>
+    </div>
+
+    <div class="project-card fade-in" data-category="iot" style="--card-accent:#34d399" onclick="openModal('iot-smarthome')">
+      <div class="project-meta"><span class="project-type">IoT · Hardware</span><span class="project-arrow">↗</span></div>
+      <h3 class="project-title">IoT Smart Home Network</h3>
+      <p class="project-desc">Raspberry Pi smart home with voice activation via Vosk, Zigbee/MQTT for light control, and a local web interface. Fully offline — no cloud dependencies.</p>
+      <div class="project-tags">
+        <span class="project-tag">Raspberry Pi</span><span class="project-tag">MQTT</span><span class="project-tag">Zigbee</span><span class="project-tag">Vosk</span><span class="project-tag">Python</span>
+      </div>
+    </div>
+
+    <div class="projects-empty" id="projects-empty">No projects match your search.</div>
 
   </div>
 </section>
@@ -460,23 +523,23 @@ const PROJECTS = {
     title: 'ImitationArm',
     type: 'Robotics · Hardware',
     accent: '#6c63ff',
-    github: 'https://github.com/andrearante12/ImitationArm',
+    github: 'https://github.com/andrearante12/ros2_ws',
     description: [
-      'A 6-DOF robotic arm that learns manipulation skills by watching human demonstrations and replicating them autonomously. The end goal: upload a short video of a pick-and-place task and have the arm reproduce it without any additional programming.',
-      'The full control stack runs on a Raspberry Pi under ROS2 Jazzy, integrating motion planning, trajectory execution, IMU signal processing, and low-level microcontroller communication over serial.'
+      'A 6-DOF robotic arm that learns manipulation skills by watching human demonstrations via Imitation Learning and Behavioral Cloning. The end goal: upload a short video of a pick-and-place task and have the arm reproduce it without any additional programming.',
+      'The full control stack on ROS2 Jazzy, integrating motion planning, trajectory execution, IMU signal processing, and low-level microcontroller communication over serial communication.'
     ],
     highlights: [
       'Wearable IMU controller (ESP32 + MPU-6050) streams motion data over WiFi/MQTT in real time',
       'Custom inverse kinematics via gradient descent converts (x, y, z) targets to servo angles',
       'MoveIt2 handles trajectory planning and collision detection before executing any motion',
       'Six MG996R PWM servos driven by a PCA9685 16-channel PWM controller over I2C',
-      'Full SolidWorks CAD model recreated from scratch — original aluminum kit had no official files',
+      'Full SolidWorks CAD model recreated from scratch',
       'Vision-assisted calibration and full imitation learning pipeline in active development'
     ],
-    stack: ['ROS2 Jazzy','MoveIt2','ESP32','MPU-6050','MQTT','Python','Arduino','SolidWorks','Raspberry Pi','I2C/Serial'],
+    stack: ['ROS2 Jazzy','MoveIt2','ESP32','MPU-6050','MQTT','Python','Arduino','SolidWorks','MuJuCo','I2C/Serial'],
     media: [
-      { label: 'Demo — rviz2 motion planning', hint: 'video or GIF', icon: '▶' },
-      { label: 'Hardware photo — wearable controller', hint: 'image', icon: '◻' }
+      { src: 'videos/robotic_arm_sim.mov', label: 'Pick and place demo in MuJuCo simulator' },
+      { src: 'videos/robotic_arm_battery.mov', label: 'Pick and place demo of Battery' },
     ]
   },
   'uas-detection': {
@@ -486,19 +549,20 @@ const PROJECTS = {
     github: 'https://github.com/andrearante12/FineTune-YOLOW-UAS',
     description: [
       'Research project at GWU\'s IASL lab. Fine-tunes YOLO-World for real-time obstruction detection on UAS landing zones, enabling safe autonomous drone package delivery.',
-      'The key advantage: open-vocabulary zero-shot generalization. New obstacle types (a bicycle, a person, debris) can be queried at inference time with natural language — no retraining required — using CLIP-fused visual features.'
+      'The key advantage: open-vocabulary zero-shot generalization. New obstacle types (a bicycle, a person, debris) can be queried at inference time with natural language, requiring no retraining, using CLIP-fused visual features.'
     ],
     highlights: [
       'Fine-tuned on the VisDrone dataset, optimizing detection from a bird\'s-eye-view perspective',
-      'Deployed on NVIDIA Jetson Xavier for real-time edge inference',
-      'Integrates with cloud-based VLMs for scene-level reasoning beyond bounding boxes',
-      'Resolved CUBLAS/fp16 dimension mismatches on RTX 5090 (forced CLIP text encoder to float32)',
-      'Rebuilt MMCV from source for sm_120 GPU architecture; patched upstream mmyolo dependencies'
+      'Deployed on NVIDIA Jetson Xavier and NVIDIA Jetson Orin Nano for real-time edge inference',
+      'Research paper submission in progress for AIAA Scitech 2027: Open-Vocabulary UAS Landing Zone Obstruction Detection via Fine-Tuned YOLO-World'
+      // 'Integrates with cloud-based VLMs for scene-level reasoning beyond bounding boxes',
+      // 'Resolved CUBLAS/fp16 dimension mismatches on RTX 5090 (forced CLIP text encoder to float32)',
+      // 'Rebuilt MMCV from source for sm_120 GPU architecture; patched upstream mmyolo dependencies'
     ],
     stack: ['YOLO-World','MMCV','PyTorch','CLIP','Jetson Xavier','VisDrone','Python','CUDA'],
     media: [
-      { label: 'Detection output — bird\'s-eye view', hint: 'image', icon: '◻' },
-      { label: 'Real-time inference demo', hint: 'video', icon: '▶' }
+      { src: 'videos/5_epoch_better_prompts_v2_web.mp4', label: 'Finetuned version, retaining open-vocab capabilities' },
+      // { src: 'images/pedestrian_misclassification_fixed.png', label: 'Finetuned version, retaining open-vocab capabilities' },
     ]
   },
   'minecraft-rl': {
@@ -507,20 +571,20 @@ const PROJECTS = {
     accent: '#f5a623',
     github: 'https://github.com/andrearante12/Minecraft-Reinforcement-Learning',
     description: [
-      'A PPO agent built from scratch that learns to complete Minecraft parkour courses using Microsoft Malmo as the environment bridge.',
-      'Malmo only runs under Python 3.7, but PyTorch requires 3.10+. A custom TCP socket bridge on port 9999 connects two separate conda environments as OS processes, passing observations and actions as serialized packets — no RL library dependencies, pure PyTorch throughout.'
+      'A modular framework built on top of Project Malmo, an open source minecraft simulator to support training of Reinforcement Learning based agents in completely customizeable enviornments using either custom algorithm implementations or SB3.',
+      'Demo includes  PPO agent built from scratch that learns to complete Minecraft parkour courses using Microsoft Malmo as the environment bridge, and an agent trained via SB3 implemented PPO and Imitation Learning to bridge.',
+
     ],
     highlights: [
-      'Full PPO implementation from scratch — pure PyTorch, no RL library dependencies',
-      'Two-process socket architecture bridges Python 3.7 (Malmo) ↔ Python 3.10+ (PyTorch)',
-      '129-dimensional observation vector encoding player state, surroundings, and physics',
-      'Curriculum learning roadmap: flat gaps → multi-block gaps → angled landings → complex courses',
-      'Monte Carlo returns for advantage estimation; Survival mode for reliable episode resets'
+      'Full PPO implementation from scratch — pure PyTorch, no RL library dependencies as well as options for SB3 training loops',
+      // 'Two-process socket architecture bridges Python 3.7 (Malmo) ↔ Python 3.10+ (PyTorch)',
+      'Imitation Learning pipeline for recording expert trajectories simpily by playing Minecraft normally',
+      'Fully customizeable curriculum learning roadmap: (Parkour example: flat gaps → multi-block gaps → angled landings → complex courses)',
     ],
     stack: ['PPO','PyTorch','Microsoft Malmo','Python','TCP Sockets','Curriculum Learning','Java'],
     media: [
-      { label: 'Training run — agent learning gap jumps', hint: 'video or GIF', icon: '▶' },
-      { label: 'Reward / loss curves', hint: 'image', icon: '◻' }
+      { src: 'videos/n_envs_demo.mp4', label: 'Parallel training is possible with n enviornments' },
+      { src: 'videos/90%_success_one_block_jump.mp4', label: 'Succesful training episode' },
     ]
   },
   'wildfire': {
@@ -564,6 +628,49 @@ const PROJECTS = {
       { label: 'Simulation — multi-agent lane merging', hint: 'video', icon: '▶' },
       { label: 'CARLA environment setup', hint: 'image', icon: '◻' }
     ]
+  },
+  'rl-gymnasium': {
+    title: 'RL Gymnasium Agents',
+    type: 'RL · Simulation',
+    accent: '#a78bfa',
+    github: 'https://github.com/andrearante12/RL_Gymnasium',
+    description: [
+      'PPO-based agents trained across three Gymnasium environments — CarRacing-v3, LunarLander-v3, and Humanoid-v5. Each environment demanded a distinct set of design decisions to push evaluation scores to competitive levels.',
+      'Key techniques: discretized action space and multi-channel frame stacking for CarRacing, physics domain randomization for LunarLander, and a custom pose perturbation wrapper for Humanoid that prevents overfitting to clean episode starts.'
+    ],
+    highlights: [
+      'CarRacing-v3: discrete 5-action space, 84×84 grayscale frame stacking (4 frames), reward shaping for speed, grass penalty, and smoothness → 927 / 831 eval scores',
+      'LunarLander-v3: domain randomization over gravity [−11, −9], wind power [10, 20], and turbulence [1, 2] forces generalization across physics conditions',
+      'Humanoid-v5: AwkwardStartWrapper randomizes starting pose (crouch, tilt, joint noise, velocity noise) on 85% of training episodes; clean starts at eval time',
+      'All agents finetuned from saved checkpoints with linear LR decay to prevent late-stage performance regression',
+      'Humanoid uses a 348-dim observation space, 17-dim continuous action space, and a 256×256 MLP actor-critic with VecNormalize'
+    ],
+    stack: ['PPO', 'Gymnasium', 'Stable-Baselines3', 'PyTorch', 'VecNormalize', 'Python'],
+    media: [
+      { src: 'videos/testcase0.gif', label: 'Car Racing Demo' },
+      { src: 'videos/humanoid_0.gif', label: 'Humanoid Demo' },
+    ]
+  },
+  'iot-smarthome': {
+    title: 'IoT Smart Home Network',
+    type: 'IoT · Hardware',
+    accent: '#34d399',
+    github: 'https://github.com/andrearante12/IoT-Smart-Home-Network',
+    description: [
+      'A Raspberry Pi-based smart home network for remote control of smart lights through three interfaces: voice activation, physical switches, and a browser-based web UI — all running on local hardware.',
+      'Zigbee devices communicate over MQTT via zigbee2mqtt. Voice commands are processed locally using the Vosk speech recognition toolkit, keeping the system fully offline with no cloud dependencies.'
+    ],
+    highlights: [
+      'Three control modes operating in parallel: voice (Vosk), manual switches, and web interface',
+      'Zigbee-to-MQTT bridge via zigbee2mqtt for reliable smart light state management',
+      'Fully local stack — no cloud APIs, all processing on Raspberry Pi',
+      'Python backend handles command routing; HTML/JS frontend serves the web control panel'
+    ],
+    stack: ['Raspberry Pi', 'MQTT', 'Zigbee', 'Vosk', 'Python', 'HTML/JS', 'zigbee2mqtt'],
+    media: [
+      { label: 'Web control interface', hint: 'image or video', icon: '◻' },
+      { label: 'Hardware setup', hint: 'image', icon: '◻' }
+    ]
   }
 };
 
@@ -583,17 +690,23 @@ function openModal(id) {
   // Media
   html += `<div><p class="modal-section-label">Media</p><div class="media-slots">`;
   p.media.forEach(m => {
-    html += `<div class="media-slot">
-      <div class="media-placeholder">
-        <span class="ph-icon">${m.icon}</span>
-        <p>${m.label}<br><span style="opacity:.4">Add your ${m.hint} here</span></p>
-      </div>
-    </div>`;
-    /* HOW TO REPLACE A PLACEHOLDER:
-       Image:   <img src="path/to/img.jpg" style="width:100%;display:block;" alt="...">
-       Video:   <video src="path/to/demo.mp4" controls style="width:100%;display:block;"></video>
-       YouTube: <iframe src="https://www.youtube.com/embed/VIDEO_ID" style="width:100%;height:300px;border:none;" allowfullscreen></iframe>
-       Just replace the entire <div class="media-slot">...</div> block with the above. */
+    if (m.src) {
+      const isVideo = /\.(mp4|mov|webm|ogg)$/i.test(m.src);
+      const media = isVideo
+        ? `<video src="${m.src}" controls autoplay muted loop preload="auto"></video>`
+        : `<img src="${m.src}" alt="${m.label}" style="width:100%;display:block;">`;
+      html += `<div class="media-slot">
+        ${media}
+        <p class="media-caption">${m.label}</p>
+      </div>`;
+    } else {
+      html += `<div class="media-slot">
+        <div class="media-placeholder">
+          <span class="ph-icon">${m.icon}</span>
+          <p>${m.label}<br><span style="opacity:.4">Add your ${m.hint} here</span></p>
+        </div>
+      </div>`;
+    }
   });
   html += `</div></div>`;
 
@@ -630,6 +743,35 @@ function closeModal() {
 }
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* ── PROJECT FILTER / SEARCH ── */
+let activeFilter = 'all';
+let activeSearch = '';
+
+function applyProjectVisibility() {
+  const cards = document.querySelectorAll('.project-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const categoryMatch = activeFilter === 'all' || card.dataset.category === activeFilter;
+    const searchMatch = !activeSearch || card.textContent.toLowerCase().includes(activeSearch);
+    const show = categoryMatch && searchMatch;
+    card.classList.toggle('hidden', !show);
+    if (show) visible++;
+  });
+  document.getElementById('projects-empty').classList.toggle('visible', visible === 0);
+}
+
+function filterProjects(filter, btn) {
+  activeFilter = filter;
+  document.querySelectorAll('.proj-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  applyProjectVisibility();
+}
+
+function searchProjects(query) {
+  activeSearch = query.trim().toLowerCase();
+  applyProjectVisibility();
+}
 
 /* ── CURSOR ── */
 const cursor = document.getElementById('cursor');
