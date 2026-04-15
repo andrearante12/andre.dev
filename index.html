@@ -316,10 +316,13 @@
   <h2 class="section-title">Who I am</h2>
   <div class="about-grid fade-in">
     <div class="about-text">
-      <p>I'm an undergraduate computer engineering student at George Washington University with a deep focus on <strong>robotics</strong> and <strong>computer vision</strong>. My work spans the full stack — from training neural networks to wiring servos and electrical components.</p>
-      <p>Currently, I work in the Intelligent Aerospace Systems Lab (IASL) at GWU, where my research focuses on <strong>open-vocabulary obstruction detection for drone package delivery</strong> using YOLO-World deployed on a Jetson Xavier. Previously, I have worked on <strong>full-stack web development</strong> and building <strong>autonomous UGV systems</strong> as an intern at C-3 Comm Systems LLC.
-         Outside of work, I'm currently building: a 6-DOF imitation-learning arm, RL agents in Minecraft, and custom smart home systems.
-
+      <p>I'm an undergraduate computer engineering student at George Washington University with a deep focus on <strong>robotics</strong> and <strong>computer vision</strong>. My work spans the full stack 
+        — from training neural networks to wiring servos and electrical components.</p>
+      <p>
+        Currently, I work in the Intelligent Aerospace Systems Lab (IASL) at GWU, where my research focuses on <strong>open-vocabulary obstruction detection for drone package delivery</strong> using YOLO-World 
+        deployed on a Jetson Xavier. Previously, I have worked on autonomous vehicle simulations such as <strong>CARLA/SUMO simulators, integrated with OpenCDA</strong> at IASL, and <strong>full-stack web development
+        </strong> and building <strong>autonomous UGV systems</strong> as an intern at C-3 Comm Systems LLC.
+         Outside of work, I'm currently building: a 6-DOF robotic arm, RL agents in Minecraft, and custom smart home systems.
         </p>
     </div>
     <div class="about-stack">
@@ -393,9 +396,9 @@
     <div class="project-card fade-in" data-category="rl" style="--card-accent:#f5a623" onclick="openModal('minecraft-rl')">
       <div class="project-meta"><span class="project-type">RL · Simulation</span><span class="project-arrow">↗</span></div>
       <h3 class="project-title">Minecraft Parkour RL</h3>
-      <p class="project-desc">Created a custom wrapper around Project Malmo, an open source Minecraft simulation enviornment for training RL agents. Training agents to learn advanced navigation techniques such as parkour and bridging.</p>
+      <p class="project-desc">A custom wrapper around Project Malmo, an open source Minecraft simulation enviornment for training RL agents.</p>
       <div class="project-tags">
-        <span class="project-tag">PPO</span><span class="project-tag">PyTorch</span><span class="project-tag">Malmo</span><span class="project-tag">Curriculum Learning</span>
+        <span class="project-tag">PPO</span><span class="project-tag">SB3</span><span class="project-tag">Malmo</span><span class="project-tag">Reinforcement Learning</span><span class="project-tag">Imitation Learning</span>
       </div>
     </div>
 
@@ -411,9 +414,9 @@
     <div class="project-card fade-in" data-category="robotics" style="--card-accent:#00d4aa" onclick="openModal('opencda')">
       <div class="project-meta"><span class="project-type">Simulation · AV</span><span class="project-arrow">↗</span></div>
       <h3 class="project-title">OpenCDA Merging</h3>
-      <p class="project-desc">Cooperative driving automation on CARLA + SUMO. Prototyping V2X merging behaviors for autonomous vehicle fleets.</p>
+      <p class="project-desc">Cooperative driving automation on CARLA + SUMO. Prototyping merging behaviors for autonomous vehicle fleets.</p>
       <div class="project-tags">
-        <span class="project-tag">CARLA</span><span class="project-tag">SUMO</span><span class="project-tag">V2X</span><span class="project-tag">OpenCDA</span>
+        <span class="project-tag">CARLA</span><span class="project-tag">SUMO</span><span class="project-tag">OpenCDA</span>
       </div>
     </div>
 
@@ -604,8 +607,7 @@ const PROJECTS = {
     ],
     stack: ['YOLOv8','Python','Roboflow','PyTorch','OpenCV','TensorFlow'],
     media: [
-      { label: 'Detection output on wildfire imagery', hint: 'image', icon: '◻' },
-      { label: 'Training metrics / confusion matrix', hint: 'image', icon: '◻' }
+      { src: 'images/wildfire.png', label: 'Finetuned classifier capable of detecting fire' },
     ]
   },
   'opencda': {
@@ -615,18 +617,15 @@ const PROJECTS = {
     github: 'https://github.com/andrearante12/OpenCDA-Merging',
     description: [
       'A cooperative driving automation framework on top of CARLA (physics/rendering) and SUMO (traffic flow), using OpenCDA as the middleware layer for multi-agent vehicle coordination.',
-      'The project focuses on safe highway lane-merging, where connected vehicles share sensor data and negotiate trajectories via V2X communication to merge safely at highway speeds.'
     ],
     highlights: [
       'Built test environments integrating CARLA and SUMO for realistic urban/highway traffic',
-      'Multi-agent scenarios with cooperating vehicles sharing state over V2X',
       'Custom merging behavior policies for cooperative vs. non-cooperative agent comparison',
       'Part of ongoing GWU IASL research on safe autonomous driving systems'
     ],
-    stack: ['CARLA','SUMO','OpenCDA','Python','V2X','Multi-agent Systems'],
+    stack: ['CARLA','SUMO','OpenCDA','Python','Multi-agent Systems'],
     media: [
-      { label: 'Simulation — multi-agent lane merging', hint: 'video', icon: '▶' },
-      { label: 'CARLA environment setup', hint: 'image', icon: '◻' }
+      { src: 'videos/Highway_Merging.mp4', label: 'Demo of autonomous vehicle merging into a congested highway network' },
     ]
   },
   'rl-gymnasium': {

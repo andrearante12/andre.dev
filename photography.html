@@ -307,7 +307,7 @@
 <div class="photo-hero">
   <p class="hero-eyebrow">Through the lens</p>
   <h1>Stills &amp;<br><span>Light</span></h1>
-  <p>Street corners, facades, and the geometry hiding in plain sight. Shot across DC and beyond.</p>
+  <p>Shot across Washington DC, Seoul, Tokyo and Shanghai.</p>
   <div class="photo-count">
     <span id="total-count">0 photos</span>
     <span id="category-list"></span>
@@ -369,24 +369,50 @@
    ═══════════════════════════════════════════════ */
 
 const PHOTOS = [
-  /* ── STREET / URBAN ──
-     Tips: street portraits, candid moments, signs, reflections, shadows, night scenes.
-     aspect: "tall" for portrait orientation, "wide" for landscape, "square" for 1:1 */
-  { src: '', title: 'Street 01', location: 'Washington, DC', category: 'Street', aspect: 'tall', placeholder: true },
-  { src: '', title: 'Street 02', location: 'Washington, DC', category: 'Street', aspect: 'wide', placeholder: true },
-  { src: '', title: 'Street 03', location: 'Washington, DC', category: 'Street', aspect: 'tall', placeholder: true },
-  { src: '', title: 'Street 04', location: 'Washington, DC', category: 'Street', aspect: 'square', placeholder: true },
-  { src: '', title: 'Street 05', location: 'Washington, DC', category: 'Street', aspect: 'wide', placeholder: true },
-  { src: '', title: 'Street 06', location: 'Washington, DC', category: 'Street', aspect: 'tall', placeholder: true },
-
-  /* ── ARCHITECTURE ──
-     Tips: facades, interiors, geometric details, leading lines, symmetry, dusk/blue-hour shots. */
-  { src: '', title: 'Architecture 01', location: 'Washington, DC', category: 'Architecture', aspect: 'tall', placeholder: true },
-  { src: '', title: 'Architecture 02', location: 'Washington, DC', category: 'Architecture', aspect: 'wide', placeholder: true },
-  { src: '', title: 'Architecture 03', location: 'Washington, DC', category: 'Architecture', aspect: 'square', placeholder: true },
-  { src: '', title: 'Architecture 04', location: 'Washington, DC', category: 'Architecture', aspect: 'tall', placeholder: true },
-  { src: '', title: 'Architecture 05', location: 'Washington, DC', category: 'Architecture', aspect: 'wide', placeholder: true },
-  { src: '', title: 'Architecture 06', location: 'Washington, DC', category: 'Architecture', aspect: 'tall', placeholder: true },
+  { src: 'photography/DSC09709 2.JPG',  title: 'DSC09709',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/DSC09710 2.JPG',  title: 'DSC09710',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/DSC09849 2.JPG',  title: 'DSC09849',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/DSC09852 2.JPG',  title: 'DSC09852',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/DSC09869 2.JPG',  title: 'DSC09869',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/DSC09895 2.JPG',  title: 'DSC09895',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/DSC09909 2.JPG',  title: 'DSC09909',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0012 2.JPG',  title: 'IMG_0012',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0014 2.JPG',  title: 'IMG_0014',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0020 2.JPG',  title: 'IMG_0020',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0024 2.JPG',  title: 'IMG_0024',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0027 2.JPG',  title: 'IMG_0027',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0056 2.JPG',  title: 'IMG_0056',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0072 2.JPG',  title: 'IMG_0072',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0075 2.JPG',  title: 'IMG_0075',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0088 2.JPG',  title: 'IMG_0088',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0131 2.JPG',  title: 'IMG_0131',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0133 2.JPG',  title: 'IMG_0133',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0134 2.JPG',  title: 'IMG_0134',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_0145 2.JPG',  title: 'IMG_0145',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_3027 2.jpg',  title: 'IMG_3027',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_4137 3.jpg',  title: 'IMG_4137',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_4137 4.jpg',  title: 'IMG_4137 (2)', location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/IMG_4516 2.JPG',  title: 'IMG_4516',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/Image 2.jpg',     title: 'Image',     location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1020233 2.JPG',  title: 'P1020233',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1020297 2.JPG',  title: 'P1020297',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1020373 2.JPG',  title: 'P1020373',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1020434 2.JPG',  title: 'P1020434',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1020677 2.JPG',  title: 'P1020677',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1020695 2.JPG',  title: 'P1020695',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1020712 2.JPG',  title: 'P1020712',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1020713 2.JPG',  title: 'P1020713',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1030195 2.JPG',  title: 'P1030195',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1030203 2.JPG',  title: 'P1030203',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1030308 2.JPG',  title: 'P1030308',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1030360 2.JPG',  title: 'P1030360',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1030427 2.JPG',  title: 'P1030427',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1040242 2.JPG',  title: 'P1040242',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1040469 2.JPG',  title: 'P1040469',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1040665 2.JPG',  title: 'P1040665',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1040897 2.JPG',  title: 'P1040897',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1050630 2.JPG',  title: 'P1050630',  location: 'Washington, DC', category: 'Street' },
+  { src: 'photography/P1050644 2.JPG',  title: 'P1050644',  location: 'Washington, DC', category: 'Street' },
 ];
 
 /* Aspect ratio → pixel heights for placeholders */
