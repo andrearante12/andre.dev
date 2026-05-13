@@ -128,10 +128,16 @@
     overflow: hidden;
     cursor: pointer;
     display: block;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: transform 0.3s ease, opacity 0.22s ease;
   }
 
   .photo-item.hidden { display: none; }
+  .photo-item.fade-out { opacity: 0; transform: translateY(10px); }
+
+  .shuffle-btn { margin-left: auto; color: var(--accent2); }
+  .shuffle-btn:hover { color: var(--text); }
+  .shuffle-btn.spinning svg { animation: shuffle-spin 0.45s cubic-bezier(0.4,0,0.2,1); }
+  @keyframes shuffle-spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(180deg); } }
 
   .photo-item img {
     width: 100%; display: block;
@@ -319,6 +325,9 @@
 <div class="filter-bar" id="filter-bar">
   <button class="filter-btn active" data-filter="all" onclick="filterGallery('all', this)">All</button>
   <!-- Category buttons are injected by JS based on PHOTOS data -->
+  <button class="filter-btn shuffle-btn" id="shuffle-btn" onclick="shuffleGallery()">
+    <svg id="shuffle-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;margin-right:5px"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>Shuffle
+  </button>
 </div>
 
 <!-- GALLERY -->
@@ -566,6 +575,44 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') lbNav(-1);
   if (e.key === 'ArrowRight') lbNav(1);
 });
+
+/* ── Shuffle ── */
+function shuffleGallery() {
+  const btn = document.getElementById('shuffle-btn');
+  const icon = document.getElementById('shuffle-icon');
+  const masonry = document.getElementById('masonry');
+  const items = Array.from(masonry.querySelectorAll('.photo-item'));
+
+  // Animate icon
+  icon.classList.remove('spinning');
+  void icon.offsetWidth; // reflow to restart animation
+  icon.classList.add('spinning');
+  setTimeout(() => icon.classList.remove('spinning'), 450);
+
+  // Fade out visible items
+  const visible = items.filter(el => !el.classList.contains('hidden'));
+  visible.forEach(el => el.classList.add('fade-out'));
+
+  setTimeout(() => {
+    // Fisher-Yates shuffle of all items in DOM
+    for (let i = items.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      masonry.insertBefore(items[j], items[i]);
+      [items[i], items[j]] = [items[j], items[i]];
+    }
+
+    // Staggered fade-in
+    const nowVisible = Array.from(masonry.querySelectorAll('.photo-item')).filter(el => !el.classList.contains('hidden'));
+    nowVisible.forEach((el, idx) => {
+      el.style.transitionDelay = `${idx * 16}ms`;
+      el.classList.remove('fade-out');
+    });
+
+    // Clear delays after animation completes
+    const clearDelay = nowVisible.length * 16 + 300;
+    setTimeout(() => nowVisible.forEach(el => { el.style.transitionDelay = ''; }), clearDelay);
+  }, 230);
+}
 
 /* cursor */
 const cursor = document.getElementById('cursor');
