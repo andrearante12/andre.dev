@@ -1,14 +1,10 @@
-/* Shared project data — sourced by index.html (grid) and projects/*.html (detail pages). */
+/* Shared project data — sourced by the projects/*.html detail pages. */
 
 window.PROJECT_ORDER = [
   'imitation-arm',
   'uas-detection',
   'minecraft-rl',
-  'pokemon-battle',
-  'opencda',
-  'rl-gymnasium',
-  'iot-smarthome',
-  'wildfire'
+  'iot-smarthome'
 ];
 
 window.PROJECTS = {
@@ -76,63 +72,6 @@ window.PROJECTS = {
       { src: 'videos/successful_diagonal_bridge.mp4', label: 'Succesful bridging episode (diagonal)' }
     ]
   },
-  'wildfire': {
-    title: 'Wildfire Early Detection',
-    type: 'Computer Vision · Classification',
-    accent: '#ff6b6b',
-    github: 'https://github.com/andrearante12/Wildfire-Classification',
-    description: [
-      'A YOLO-based computer vision model trained to detect early signs of wildfire, such as smoke plumes and flame signatures, in ground-level imagery taken from early detection outposts across California.',
-      'Early fire detection from AlertCalifornia live feeds can give emergency services critical lead time.'
-    ],
-    highlights: [
-      'Classifies both smoke (early-stage) and active flame'
-    ],
-    stack: ['YOLOv8','Python','Roboflow','PyTorch','OpenCV','TensorFlow'],
-    media: [
-      { src: 'images/wildfire.png', label: 'Finetuned classifier capable of detecting fire' }
-    ]
-  },
-  'opencda': {
-    title: 'OpenCDA Merging',
-    type: 'Simulation · Autonomous Vehicles',
-    accent: '#00d4aa',
-    github: 'https://github.com/andrearante12/OpenCDA-Merging',
-    description: [
-      'A cooperative driving automation framework on top of CARLA (physics/rendering) and SUMO (traffic flow), using OpenCDA as the middleware layer for multi-agent vehicle coordination.'
-    ],
-    highlights: [
-      'Built test environments integrating CARLA and SUMO for realistic urban/highway traffic',
-      'Custom merging behavior policies for cooperative vs. non-cooperative agent comparison',
-      'Part of ongoing GWU IASL research on safe autonomous driving systems'
-    ],
-    stack: ['CARLA','SUMO','OpenCDA','Python','Multi-agent Systems'],
-    media: [
-      { src: 'videos/Highway_Merging.mp4', label: 'Demo of autonomous vehicle merging into a congested highway network' }
-    ]
-  },
-  'rl-gymnasium': {
-    title: 'RL Gymnasium Agents',
-    type: 'RL · Simulation',
-    accent: '#a78bfa',
-    github: 'https://github.com/andrearante12/RL_Gymnasium',
-    description: [
-      'PPO-based agents trained across three Gymnasium environments — CarRacing-v3, LunarLander-v3, and Humanoid-v5. Each environment demanded a distinct set of design decisions to push evaluation scores to competitive levels.',
-      'Key techniques: discretized action space and multi-channel frame stacking for CarRacing, physics domain randomization for LunarLander, and a custom pose perturbation wrapper for Humanoid that prevents overfitting to clean episode starts.'
-    ],
-    highlights: [
-      'CarRacing-v3: discrete 5-action space, 84×84 grayscale frame stacking (4 frames), reward shaping for speed, grass penalty, and smoothness → 927 / 831 eval scores',
-      'LunarLander-v3: domain randomization over gravity [−11, −9], wind power [10, 20], and turbulence [1, 2] forces generalization across physics conditions',
-      'Humanoid-v5: AwkwardStartWrapper randomizes starting pose (crouch, tilt, joint noise, velocity noise) on 85% of training episodes; clean starts at eval time',
-      'All agents finetuned from saved checkpoints with linear LR decay to prevent late-stage performance regression',
-      'Humanoid uses a 348-dim observation space, 17-dim continuous action space, and a 256×256 MLP actor-critic with VecNormalize'
-    ],
-    stack: ['PPO', 'Gymnasium', 'Stable-Baselines3', 'PyTorch', 'VecNormalize', 'Python'],
-    media: [
-      { src: 'videos/testcase0.gif', label: 'Car Racing Demo' },
-      { src: 'videos/humanoid_0.gif', label: 'Humanoid Demo' }
-    ]
-  },
   'iot-smarthome': {
     title: 'IoT Smart Home Network',
     type: 'IoT · Hardware',
@@ -152,29 +91,6 @@ window.PROJECTS = {
     media: [
       { label: 'Web control interface', hint: 'image or video', icon: '◻' },
       { label: 'Hardware setup', hint: 'image', icon: '◻' }
-    ]
-  },
-  'pokemon-battle': {
-    title: 'Pokémon Miniconsole',
-    type: 'Embedded Systems · C',
-    accent: '#facc15',
-    github: 'https://github.com/andrearante12/Pokemon_on_Tivaware',
-    description: [
-      'A fully playable Pokémon turn-based battle game running on a TI Tiva C (TM4C123) microcontroller. The game renders ASCII art battle sprites and menus directly into a host terminal over UART using ANSI escape sequences for efficient partial-screen updates — no full redraws.',
-      'Music is handled by a non-blocking Timer0 ISR that toggles a speaker pin at note frequency while the main loop runs game logic. A custom Python script converts MIDI files into C arrays the firmware plays back directly, reducing chords to a single melody line the single-channel speaker can reproduce.'
-    ],
-    highlights: [
-      'ANSI escape sequences reposition the cursor mid-frame so only changed cells are retransmitted (zero full-screen redraws)',
-      'Four Pokémon songs (Black/White, Red/Blue, Center Theme, X/Y) encoded as (note, duration) C arrays via midi_to_c.py',
-      'Timer0 ISR handles both pin toggling and song sequencing, keeping audio fully non-blocking',
-      'HW-504 two-axis joystick read over ADC0 with dead-zone filtering (thresholds 800 / 3200 out of 4095) and held-input lockout',
-      'Two-sample 20 ms debounce on SW1/SW2 for reliable button presses; joystick push-button mutes audio',
-      'ASCII sprite assets for Bulbasaur and Squirtle stored in .h header files, generated from PNG via online converter'
-    ],
-    stack: ['C', 'TI TM4C123', 'TivaWare SDK', 'UART', 'ADC', 'Timer ISR', 'GPIO', 'ANSI Escapes', 'Python', 'MIDI'],
-    media: [
-      { src: 'videos/pokemon_miniconsole_demo_video.mov', label: 'Realtime Demo' },
-      { src: 'images/battle_game_demo.png', label: 'Terminal capture — ASCII art battle scene' }
     ]
   }
 };
