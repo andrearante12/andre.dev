@@ -1,14 +1,24 @@
-/* Renders a project detail page from the shared PROJECTS data.
+/* Renders a project detail page from the shared projects.json data.
  * Expects window.PROJECT_SLUG to be set before this script runs. */
 
-(function () {
+(async function () {
   const slug = window.PROJECT_SLUG;
-  const project = window.PROJECTS && window.PROJECTS[slug];
-  const order = window.PROJECT_ORDER || [];
+  const main = document.querySelector('.project-page');
+
+  let list = [];
+  try {
+    const res = await fetch('../projects.json', { cache: 'no-cache' });
+    list = await res.json();
+  } catch (e) {
+    if (main) main.innerHTML = '<p style="font-family:var(--mono);color:var(--muted);text-align:center;padding:80px 0;">Could not load projects.</p>';
+    return;
+  }
+
+  const project = list.find(p => p.slug === slug);
+  const order = list.map(p => p.slug);
 
   if (!project) {
     document.title = 'Project not found — Andre Arante';
-    const main = document.querySelector('.project-page');
     if (main) main.innerHTML = '<p style="font-family:var(--mono);color:var(--muted);text-align:center;padding:80px 0;">Project not found.</p>';
     return;
   }
@@ -24,6 +34,19 @@
   setText('.project-eyebrow', project.type);
   setText('.project-title', project.title);
 
+  /* Turn a YouTube/Vimeo URL into an embeddable player URL (or null). */
+  function toEmbedSrc(url) {
+    if (!url) return null;
+    let m;
+    if ((m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/))) {
+      return 'https://www.youtube.com/embed/' + m[1];
+    }
+    if ((m = url.match(/vimeo\.com\/(?:video\/)?(\d+)/))) {
+      return 'https://player.vimeo.com/video/' + m[1];
+    }
+    return url; // already an embed/player URL
+  }
+
   /* Media */
   const mediaContainer = document.querySelector('.project-media');
   if (mediaContainer && project.media && project.media.length) {
@@ -36,7 +59,19 @@
       const slot = document.createElement('div');
       slot.className = 'media-slot';
 
-      if (m.src) {
+      const embedUrl = m.type === 'embed' ? toEmbedSrc(m.url) : null;
+
+      if (embedUrl) {
+        const wrap = document.createElement('div');
+        wrap.className = 'media-embed';
+        const iframe = document.createElement('iframe');
+        iframe.src = embedUrl;
+        iframe.loading = 'lazy';
+        iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+        iframe.allowFullscreen = true;
+        wrap.appendChild(iframe);
+        slot.appendChild(wrap);
+      } else if (m.src) {
         const isVideo = /\.(mp4|mov|webm|ogg)$/i.test(m.src);
         const url = '../' + m.src;
         if (isVideo) {
@@ -58,11 +93,11 @@
       } else {
         const ph = document.createElement('div');
         ph.className = 'media-placeholder';
-        ph.innerHTML = `<span class="ph-icon">${m.icon || '◻'}</span><p>${m.label}<br><span style="opacity:.5">Add your ${m.hint || 'media'} here</span></p>`;
+        ph.innerHTML = `<span class="ph-icon">${m.icon || '◻'}</span><p>${m.label || ''}<br><span style="opacity:.5">Add your ${m.hint || 'media'} here</span></p>`;
         slot.appendChild(ph);
       }
 
-      if (m.label && m.src) {
+      if (m.label && (embedUrl || m.src)) {
         const cap = document.createElement('p');
         cap.className = 'media-caption';
         cap.textContent = m.label;
@@ -113,8 +148,8 @@
     const idx = order.indexOf(slug);
     const prevSlug = order[(idx - 1 + order.length) % order.length];
     const nextSlug = order[(idx + 1) % order.length];
-    const prev = window.PROJECTS[prevSlug];
-    const next = window.PROJECTS[nextSlug];
+    const prev = list.find(p => p.slug === prevSlug);
+    const next = list.find(p => p.slug === nextSlug);
 
     nav.innerHTML = `
       <a class="prev-next-link prev" href="${prevSlug}.html">
@@ -127,7 +162,6 @@
       </a>
     `;
 
-    /* Keyboard navigation */
     document.addEventListener('keydown', e => {
       if (e.target.matches('input, textarea')) return;
       if (e.key === 'ArrowLeft') window.location.href = prevSlug + '.html';
