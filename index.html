@@ -70,11 +70,13 @@
     min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
     padding: 100px 80px 80px; position: relative; z-index: 1;
   }
-  #hero-canvas {
-    position: absolute; inset: 0; width: 100%; height: 100%;
-    z-index: 0; pointer-events: none;
-    mask-image: radial-gradient(120% 100% at 70% 40%, black 30%, transparent 80%);
-    -webkit-mask-image: radial-gradient(120% 100% at 70% 40%, black 30%, transparent 80%);
+  /* one continuous, fixed sky shared by the hero + about (no seam between them) */
+  #sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+  .sky-glow {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background:
+      radial-gradient(80% 55% at 80% -8%, rgba(108,99,255,0.14), transparent 60%),
+      radial-gradient(60% 45% at 8% 22%, rgba(0,212,170,0.06), transparent 60%);
   }
   .hero-content { position: relative; z-index: 1; }
   .hero-eyebrow {
@@ -110,9 +112,38 @@
   .tag { font-family: var(--mono); font-size: 11px; padding: 5px 12px; border-radius: 3px; border: 1px solid var(--border); color: var(--muted); letter-spacing: 0.04em; transition: all 0.2s; }
   .tag:hover { border-color: var(--accent); color: var(--accent); }
   .tag.active { background: rgba(108,99,255,0.12); border-color: var(--accent); color: var(--accent); }
+  .about-links { display: flex; flex-wrap: wrap; gap: 10px; }
+  .about-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 1px solid var(--border); border-radius: 5px; text-decoration: none; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.2s; }
+  .about-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+  .about-link svg { width: 14px; height: 14px; flex-shrink: 0; }
+
+  /* ABOUT — transparent over the shared sky; the page "lands" on a horizon */
+  #about { overflow: hidden; padding-bottom: 340px; }
+  .about-grid { position: relative; z-index: 2; }
+  #about > .section-label, #about > .section-title { position: relative; z-index: 2; }
+
+  /* observatory: atmospheric horizon haze + layered ground + telescope */
+  .observatory { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; z-index: 1; pointer-events: none; }
+  .observatory .haze {
+    position: absolute; left: 0; right: 0; bottom: 90px; height: 230px;
+    background:
+      radial-gradient(120% 100% at 72% 100%, rgba(0,212,170,0.10), transparent 72%),
+      linear-gradient(to top, rgba(108,99,255,0.09), transparent 75%);
+  }
+  .observatory .ground { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 150px; display: block; }
+  .observatory .telescope { position: absolute; bottom: 56px; right: 7%; width: 360px; height: 290px; display: block; }
+
+  @media (max-width: 600px) {
+    #about { padding-bottom: 250px; }
+    .observatory { height: 240px; }
+    .observatory .haze { bottom: 72px; height: 170px; }
+    .observatory .ground { height: 112px; }
+    .observatory .telescope { width: 240px; height: 200px; right: 2%; bottom: 44px; }
+  }
 
   /* PROJECTS */
   #projects { background: var(--bg2); }
+  #experience { background: var(--bg2); }
 
   .projects-controls {
     display: flex; align-items: center; justify-content: space-between;
@@ -181,14 +212,29 @@
   .project-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); }
   .project-tag { font-family: var(--mono); font-size: 10px; padding: 3px 8px; border-radius: 2px; color: var(--muted); background: rgba(255,255,255,0.04); letter-spacing: 0.04em; }
 
-  /* EXPERIENCE */
-  .timeline { display: flex; flex-direction: column; max-width: 760px; }
-  .timeline-item { display: grid; grid-template-columns: 140px 1fr; gap: 32px; padding: 32px 0; border-bottom: 1px solid var(--border); }
+  /* PUBLICATIONS */
+  .pub-list { max-width: 760px; display: grid; gap: 20px; }
+  .timeline { display: flex; flex-direction: column; }
+  .timeline-item { display: grid; grid-template-columns: 120px 1fr; gap: 28px; padding: 30px 0; border-bottom: 1px solid var(--border); }
+  .timeline-item:first-child { padding-top: 0; }
   .timeline-item:last-child { border-bottom: none; }
   .timeline-date { font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: 0.06em; padding-top: 4px; text-align: right; line-height: 1.5; }
   .timeline-content h3 { font-family: var(--display); font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
   .timeline-content .org { font-size: 13px; color: var(--accent2); font-family: var(--mono); margin-bottom: 12px; }
   .timeline-content p { font-size: 14px; color: var(--muted); line-height: 1.65; }
+  .tl-bullets { list-style: none; display: flex; flex-direction: column; gap: 9px; }
+  .tl-bullets li { position: relative; padding-left: 18px; font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .tl-bullets li::before { content: '▸'; position: absolute; left: 0; top: 0; color: var(--accent); font-size: 11px; }
+
+  .pub { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 24px; position: relative; overflow: hidden; }
+  .pub::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent2); }
+  .pub-title { font-family: var(--display); font-size: 17px; font-weight: 700; line-height: 1.32; color: var(--text); margin-bottom: 12px; }
+  .pub-authors { font-family: var(--mono); font-size: 12px; color: var(--muted); line-height: 1.6; margin-bottom: 4px; }
+  .pub-authors b { color: var(--text); font-weight: 500; }
+  .pub-venue { font-family: var(--mono); font-size: 11px; color: var(--accent2); letter-spacing: 0.03em; margin-bottom: 16px; }
+  .pub-desc { font-size: 14px; color: var(--muted); line-height: 1.7; margin-bottom: 18px; }
+  .pub-link { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); text-decoration: none; transition: color 0.2s; }
+  .pub-link:hover { color: var(--text); }
 
   /* CONTACT */
   #contact { background: var(--bg2); text-align: center; padding-bottom: 120px; }
@@ -306,6 +352,9 @@
 </head>
 <body>
 
+<div class="sky-glow" aria-hidden="true"></div>
+<canvas id="sky-canvas" aria-hidden="true"></canvas>
+
 <div class="cursor-dot" id="cursor"></div>
 
 <nav>
@@ -313,14 +362,13 @@
   <ul class="nav-links">
     <li><a href="#about">About</a></li>
     <li><a href="#projects">Projects</a></li>
-    <li><a href="#experience">Experience</a></li>
+    <li><a href="#experience">Publications</a></li>
     <li><a href="#contact">Contact</a></li>
     <li><a href="photography.html" style="color:var(--accent2)">Photography ↗</a></li>
   </ul>
 </nav>
 
 <section class="hero">
-  <canvas id="hero-canvas"></canvas>
   <div class="hero-content">
     <p class="hero-eyebrow">Computer Engineering @ GWU · Class of '27</p>
     <div class="hero-namebox" id="namebox">
@@ -330,7 +378,7 @@
     <p class="hero-role"><span class="prompt">&gt;</span><span id="role-text"></span><span class="caret">▋</span></p>
     <p class="hero-tagline">Focused on <strong>computer vision</strong>, <strong>reinforcement learning</strong>, and <strong>robotic systems</strong> — from simulation to real-world implementation.</p>
     <div class="hero-cta">
-      <a class="btn btn-primary" href="assets/Andre_Arante_Resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+      <a class="btn btn-primary" href="resume/resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
       <a class="btn btn-ghost" href="#projects">View Projects</a>
       <a class="btn btn-ghost" href="https://github.com/andrearante12" target="_blank" rel="noopener">GitHub →</a>
     </div>
@@ -338,6 +386,90 @@
 </section>
 
 <section id="about">
+  <div class="observatory" aria-hidden="true">
+    <div class="haze"></div>
+    <svg class="ground" viewBox="0 0 1200 150" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#0a0a12"/>
+          <stop offset="1" stop-color="#111118"/>
+        </linearGradient>
+      </defs>
+      <!-- far ridge -->
+      <path d="M0,72 C260,54 430,80 660,62 C880,46 1040,74 1200,58 L1200,150 L0,150 Z" fill="#0c0c16"/>
+      <!-- near ground (blends down into the Projects section bg) -->
+      <path d="M0,98 C220,82 420,110 640,92 C860,74 1020,106 1200,88 L1200,150 L0,150 Z" fill="url(#gnd)"/>
+      <path d="M0,98 C220,82 420,110 640,92 C860,74 1020,106 1200,88" fill="none" stroke="rgba(0,212,170,0.22)" stroke-width="1.5"/>
+    </svg>
+    <svg class="telescope" viewBox="0 0 420 320" preserveAspectRatio="xMidYMax meet">
+      <defs>
+        <linearGradient id="scope-beam" x1="0" y1="1" x2="1" y2="0">
+          <stop offset="0" stop-color="rgba(0,212,170,0)"/>
+          <stop offset="1" stop-color="rgba(0,212,170,0.6)"/>
+        </linearGradient>
+        <radialGradient id="lens-glow" cx="0.5" cy="0.5" r="0.5">
+          <stop offset="0" stop-color="rgba(0,212,170,0.9)"/>
+          <stop offset="1" stop-color="rgba(0,212,170,0)"/>
+        </radialGradient>
+        <filter id="scope-glow" x="-300%" y="-300%" width="700%" height="700%">
+          <feGaussianBlur stdDeviation="2.8" result="b"/>
+          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      <!-- target star + sight line the scope is aimed at -->
+      <line x1="346" y1="49" x2="369" y2="23" stroke="url(#scope-beam)" stroke-width="2.5" opacity="0.65"/>
+      <circle cx="372" cy="19" r="4" fill="#fff" filter="url(#scope-glow)"/>
+
+      <!-- ground contact shadow -->
+      <ellipse cx="232" cy="304" rx="78" ry="9" fill="#000" opacity="0.45"/>
+
+      <!-- tripod -->
+      <g stroke="#10101c" stroke-width="7" stroke-linecap="round">
+        <line x1="230" y1="186" x2="176" y2="300"/>
+        <line x1="230" y1="186" x2="290" y2="300"/>
+        <line x1="232" y1="190" x2="238" y2="306"/>
+      </g>
+      <!-- accent rim light down the front legs -->
+      <g stroke="rgba(0,212,170,0.30)" stroke-width="1.6" stroke-linecap="round">
+        <line x1="228" y1="190" x2="178" y2="296"/>
+        <line x1="232" y1="190" x2="288" y2="296"/>
+      </g>
+      <!-- accessory tray -->
+      <path d="M196,250 L264,250 L256,262 L204,262 Z" fill="#0e0e18"/>
+
+      <!-- equatorial mount head + counterweight -->
+      <rect x="212" y="168" width="36" height="26" rx="6" fill="#13131f" stroke="rgba(108,99,255,0.3)" stroke-width="1.5"/>
+      <line x1="240" y1="190" x2="272" y2="224" stroke="#13131f" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="275" cy="227" r="9" fill="#15152200" stroke="rgba(108,99,255,0.4)" stroke-width="2"/>
+      <circle cx="275" cy="227" r="9" fill="#131320"/>
+
+      <!-- optical tube assembly, aimed up at the star -->
+      <g transform="rotate(-48 230 178)">
+        <!-- dovetail + tube rings -->
+        <rect x="206" y="190" width="118" height="8" rx="3" fill="#0e0e18"/>
+        <rect x="236" y="168" width="9" height="32" rx="3" fill="#0e0e18"/>
+        <rect x="300" y="168" width="9" height="32" rx="3" fill="#0e0e18"/>
+        <!-- main tube -->
+        <rect x="214" y="163" width="172" height="30" rx="15" fill="#13131f"/>
+        <!-- dew shield + objective lens (front, up-sky end) -->
+        <rect x="378" y="159" width="28" height="38" rx="9" fill="#16162c"/>
+        <ellipse cx="404" cy="178" rx="6" ry="16" fill="url(#lens-glow)"/>
+        <ellipse cx="404" cy="178" rx="6" ry="16" fill="none" stroke="rgba(0,212,170,0.55)" stroke-width="1.5"/>
+        <!-- rim light along the top edge -->
+        <path d="M220,164 H398" fill="none" stroke="rgba(0,212,170,0.4)" stroke-width="1.6" stroke-linecap="round"/>
+        <path d="M222,192 H384" fill="none" stroke="rgba(108,99,255,0.25)" stroke-width="1.4" stroke-linecap="round"/>
+        <!-- focuser + eyepiece (back, eye end) -->
+        <rect x="206" y="180" width="16" height="24" rx="3" fill="#10101c"/>
+        <rect x="200" y="200" width="22" height="11" rx="3" fill="#13131f"/>
+        <!-- finder scope -->
+        <rect x="270" y="148" width="74" height="9" rx="4" fill="#0e0e18"/>
+        <rect x="340" y="146" width="8" height="13" rx="2" fill="#10101c"/>
+        <line x1="286" y1="157" x2="286" y2="163" stroke="#0e0e18" stroke-width="4"/>
+        <line x1="326" y1="157" x2="326" y2="163" stroke="#0e0e18" stroke-width="4"/>
+      </g>
+    </svg>
+  </div>
   <p class="section-label">About</p>
   <h2 class="section-title">Who I am</h2>
   <div class="about-grid fade-in">
@@ -379,6 +511,23 @@ Fine-Tuned YOLO-World" is planned to be submitted to the AIAA SciTech Forum 2027
           <span class="tag">Docker</span><span class="tag">Linux</span>
         </div>
       </div>
+      <div>
+        <p class="stack-group-label">Links</p>
+        <div class="about-links">
+          <a class="about-link" href="resume/resume.pdf" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+            Resume
+          </a>
+          <a class="about-link" href="https://github.com/andrearante12" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+            GitHub
+          </a>
+          <a class="about-link" href="https://www.linkedin.com/in/andre-arante" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
+            LinkedIn
+          </a>
+        </div>
+      </div>
     </div>
   </div>
 </section>
@@ -393,7 +542,6 @@ Fine-Tuned YOLO-World" is planned to be submitted to the AIAA SciTech Forum 2027
     <div class="proj-filters">
       <button class="proj-filter active" data-filter="all" onclick="filterProjects('all',this)">All</button>
       <button class="proj-filter" data-filter="robotics" onclick="filterProjects('robotics',this)">Robotics</button>
-      <button class="proj-filter" data-filter="cv" onclick="filterProjects('cv',this)">Computer Vision</button>
       <button class="proj-filter" data-filter="rl" onclick="filterProjects('rl',this)">Reinforcement Learning</button>
       <button class="proj-filter" data-filter="embedded" onclick="filterProjects('embedded',this)">Embedded Systems</button>
     </div>
@@ -406,41 +554,15 @@ Fine-Tuned YOLO-World" is planned to be submitted to the AIAA SciTech Forum 2027
 <div class="section-divider"></div>
 
 <section id="experience">
-  <p class="section-label">Experience</p>
-  <h2 class="section-title">Timeline</h2>
-  <div class="timeline">
-    <div class="timeline-item fade-in">
-      <div class="timeline-date">May 2026<br>– Present</div>
-      <div class="timeline-content">
-        <h3>Software Engineering Intern</h3>
-        <p class="org">Dell Technologies · Austin, TX</p>
-        <p>Incoming software engineering intern at Dell Technologies.</p>
-      </div>
-    </div>
-    <div class="timeline-item fade-in">
-      <div class="timeline-date">Sep 2025<br>– Present</div>
-      <div class="timeline-content">
-        <h3>Undergraduate Research Assistant</h3>
-        <p class="org">IASL · George Washington University, Washington, DC</p>
-        <p>Deployed YOLO-World on Jetson Xavier for open-vocabulary real-time UAS obstruction detection and tracking, integrating with cloud-based VLMs for complex scene reasoning. Fine-tuned models on the VisDrone dataset for bird's-eye-view object detection, and built cooperative-driving test environments in CARLA + SUMO with OpenCDA to model multi-agent lane merging scenarios.</p>
-      </div>
-    </div>
-    <div class="timeline-item fade-in">
-      <div class="timeline-date">Feb 2024<br>– Feb 2025</div>
-      <div class="timeline-content">
-        <h3>Software Engineering Intern</h3>
-        <p class="org">C-3 Communication Systems, LLC · Bethesda, MD</p>
-        <p>Led end-to-end development of an autonomous unmanned ground vehicle (UGV) from concept through demonstration. Re-architected the system to offload perception and planning to a Jetson Orin via a custom Python API, enabling YOLO, OpenCV, and ORB-SLAM at scale. Built a Flask-based command center for real-time monitoring. Designed and maintained full-stack Operations Management System used by 8 employees to automate payroll and project analytics.</p>
-      </div>
-    </div>
-    <div class="timeline-item fade-in">
-      <div class="timeline-date">Jun – Aug 2023</div>
-      <div class="timeline-content">
-        <h3>Data Science Intern</h3>
-        <p class="org">Kaiser Permanente · San Jose, CA</p>
-        <p>Refactored a SAS pipeline to automate processing of millions of patient records. Developed Tableau dashboards with daily automatic updates to support hospital staffing decisions, and streamlined tracking of 80,000+ annual patient visits across five hospitals.</p>
-      </div>
-    </div>
+  <p class="section-label">Research</p>
+  <h2 class="section-title">Publications</h2>
+  <div class="pub-list">
+    <article class="pub fade-in">
+      <h3 class="pub-title">Open-Vocabulary Obstruction Detection for UAS Landing via Fine-Tuned YOLO-World</h3>
+      <p class="pub-authors"><b>Andre Arante</b>, Mahyar Ghazanfari, Can Vu, Peng Wei</p>
+      <p class="pub-venue">George Washington University · In submission — AIAA SciTech 2027</p>
+      <p class="pub-desc">Safe autonomous landing remains a critical challenge for package-delivery UAS, where an undetected obstruction in the landing zone poses a serious hazard. Traditional closed-set object detectors only recognize the fixed classes they were trained on, so they can't generalize to the arbitrary obstacles found in real-world deployment. We instead propose <b>open-vocabulary detection</b>: fine-tuning YOLO-World on the VisDrone aerial dataset while freezing the CLIP text encoder to preserve zero-shot generalization to novel obstacle types queryable in natural language.</p>
+    </article>
   </div>
 </section>
 
@@ -452,21 +574,9 @@ Fine-Tuned YOLO-World" is planned to be submitted to the AIAA SciTech Forum 2027
     <h2 class="section-title">Let's talk</h2>
     <p>I'm always open to research collaborations, internship opportunities, and conversations about robotics, CV, or RL.</p>
     <div class="contact-links">
-      <a class="contact-link" href="assets/Andre_Arante_Resume.pdf" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-        Resume
-      </a>
-      <a class="contact-link" href="https://github.com/andrearante12" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-        GitHub
-      </a>
       <a class="contact-link" href="mailto:andrearante12@gmail.com">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
         Email
-      </a>
-      <a class="contact-link" href="https://www.linkedin.com/in/andre-arante" target="_blank" rel="noopener">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
-        LinkedIn
       </a>
     </div>
     <div style="margin-top:48px; padding-top:40px; border-top:1px solid var(--border);">
@@ -598,7 +708,9 @@ window.addEventListener('scroll', () => {
   const card = p => {
     const icon = ICONS[p.icon] || ICONS.default || '';
     const tags = (p.cardTags || []).map(t => `<span class="project-tag">${esc(t)}</span>`).join('');
-    return `<a class="project-card fade-in${p.featured ? ' featured' : ''}" data-category="${esc(p.category)}" style="--card-accent:${esc(p.accent || '#6c63ff')}" href="projects/${esc(p.slug)}.html">
+    const href = p.github || `projects/${p.slug}.html`;
+    const ext = p.github ? ' target="_blank" rel="noopener"' : '';
+    return `<a class="project-card fade-in" data-category="${esc(p.category)}" style="--card-accent:${esc(p.accent || '#6c63ff')}" href="${esc(href)}"${ext}>
       <div class="project-icon" aria-hidden="true">${icon}</div>
       <div class="project-meta"><span class="project-type">${esc(p.type)}</span><span class="project-arrow">↗</span></div>
       <h3 class="project-title">${esc(p.title)}</h3>
@@ -606,7 +718,7 @@ window.addEventListener('scroll', () => {
       <div class="project-tags">${tags}</div>
     </a>`;
   };
-  grid.innerHTML = list.map(card).join('') +
+  grid.innerHTML = list.filter(p => !p.research).map(card).join('') +
     '<div class="projects-empty" id="projects-empty">No projects match your search.</div>';
   grid.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
   initSpotlight();

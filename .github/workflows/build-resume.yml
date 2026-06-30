@@ -1,0 +1,67 @@
+name: Build resume PDF
+
+# Compiles resume/resume.tex -> resume/resume.pdf whenever the LaTeX source
+# changes, then commits the PDF (and a cache-busted link) back so GitHub Pages
+# serves the latest version. Runs only when resume/** changes, so
+# it never fires until you add your source, and the commit it makes (PDF + HTML)
+# does not re-trigger it (paths filter + GITHUB_TOKEN commits don't loop).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'resume/**'
+      - '.github/workflows/build-resume.yml'
+  workflow_dispatch:   # lets you trigger a rebuild manually from the Actions tab
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-resume
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for LaTeX source
+        id: check
+        run: |
+          if [ -f resume/resume.tex ]; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::No resume/resume.tex yet — add your Overleaf source to build the PDF. Skipping."
+          fi
+
+      - name: Compile resume LaTeX
+        if: steps.check.outputs.exists == 'true'
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: resume
+          root_file: resume.tex
+          # If your template needs XeLaTeX or LuaLaTeX (e.g. it uses fontspec /
+          # custom fonts), uncomment ONE of the lines below:
+          # latexmk_use_xelatex: true
+          # latexmk_use_lualatex: true
+
+      - name: Bust caches
+        if: steps.check.outputs.exists == 'true'
+        run: |
+          set -euo pipefail
+          VERSION="${GITHUB_SHA::7}"
+          # Point every resume link at the rebuilt PDF with a fresh ?v= so browsers
+          # and the GitHub Pages CDN never serve a stale copy.
+          find . -name '*.html' -not -path './.git/*' -print0 \
+            | xargs -0 sed -i -E \
+              "s#resume/resume\.pdf(\?v=[A-Za-z0-9]+)?#resume/resume.pdf?v=${VERSION}#g"
+
+      - name: Commit updated resume
+        if: steps.check.outputs.exists == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: rebuild resume PDF from LaTeX [skip ci]"
+          file_pattern: 'resume/resume.pdf *.html'

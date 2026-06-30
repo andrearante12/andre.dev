@@ -5,11 +5,18 @@
     "type": "Robotics · Hardware",
     "accent": "#6c63ff",
     "category": "robotics",
-    "featured": true,
     "icon": "arm",
     "github": "https://github.com/andrearante12/ros2_ws",
-    "cardBlurb": "A 6-DOF robotic arm that grasps small objects, teleoperated from a custom wearable IMU glove or keyboard. ROS2 control stack, gradient-descent inverse kinematics, and MuJoCo sim environments for reinforcement learning.",
-    "cardTags": ["ROS2", "MoveIt2", "ESP32", "IMU", "Inverse Kinematics", "MQTT", "Python"],
+    "cardBlurb": "A 6-DOF robotic arm that grasps small objects, teleoperated from a custom wearable glove. Modular Ros2 control stack, Rviz2 IK visualizer, and MuJoCo sim environments for reinforcement learning.",
+    "cardTags": [
+      "ROS2",
+      "MoveIt2",
+      "ESP32",
+      "IMU",
+      "Inverse Kinematics",
+      "MQTT",
+      "Python"
+    ],
     "description": [
       "A 6-DOF robotic arm that learns manipulation skills by watching human demonstrations via Imitation Learning and Behavioral Cloning.",
       "The full control stack on ROS2 Jazzy, integrating motion planning, trajectory execution, IMU signal processing, and low-level microcontroller communication over serial and wireless communication."
@@ -21,11 +28,74 @@
       "Six MG996R PWM servos driven by a PCA9685 16-channel PWM controller over I2C",
       "Vision-assisted calibration and full imitation learning pipeline in active development"
     ],
-    "stack": ["ROS2 Jazzy", "MoveIt2", "ESP32", "MPU-6050", "MQTT", "Python", "Arduino", "SolidWorks", "MuJuCo", "I2C/Serial"],
+    "stack": [
+      "ROS2 Jazzy",
+      "MoveIt2",
+      "ESP32",
+      "MPU-6050",
+      "MQTT",
+      "Python",
+      "Arduino",
+      "SolidWorks",
+      "MuJuCo",
+      "I2C/Serial"
+    ],
     "media": [
-      { "src": "videos/robotic_arm_sim.mov", "label": "Pick and place demo in MuJuCo simulator" },
-      { "src": "videos/robotic_arm_battery.mov", "label": "Pick and place demo of Battery" },
-      { "src": "videos/wearable_controller.mov", "label": "Demo of Wearable Controller Teleoperation" }
+      {
+        "src": "videos/robotic_arm_sim.mov",
+        "label": "Pick and place demo in MuJuCo simulator"
+      },
+      {
+        "src": "videos/robotic_arm_battery.mov",
+        "label": "Pick and place demo of Battery"
+      },
+      {
+        "src": "videos/wearable_controller.mov",
+        "label": "Demo of Wearable Controller Teleoperation"
+      }
+    ]
+  },
+  {
+    "slug": "sortbots",
+    "title": "SortBots",
+    "type": "Robotics · Senior Capstone",
+    "status": "In Progress",
+    "accent": "#4ea8de",
+    "category": "robotics",
+    "icon": "robot",
+    "github": "https://github.com/andrearante12/SortBots",
+    "cardBlurb": "Senior capstone: a fleet of autonomous mobile robots built for collaborative delivery logistics in warehouse enviornments. Designed for rapid deployment in unmapped indoor spaces — building maps with RGB-D SLAM and splitting work through decentralized task allocation.",
+    "cardTags": [
+      "ROS2",
+      "Isaac Sim",
+      "RTAB-Map SLAM",
+      "Multi-Robot",
+      "RealSense"
+    ],
+    "description": [
+      "A senior capstone building a team of low-cost mobile robots for indoor logistics — warehouse picking, shelf restocking, food running — that deploy in minutes without per-facility infrastructure or pre-built maps.",
+      "Robots map as they move with RGB-D SLAM, coordinate through shared space, and redistribute tasks on the fly when a unit is blocked or delayed."
+    ],
+    "highlights": [
+      "End-to-end RGB-D SLAM in simulation (RTAB-Map + NVIDIA nvblox) with live mapping as robots traverse the scene",
+      "Decentralized multi-robot task allocation — work redistributes dynamically when a unit stalls or is obstructed",
+      "Realistic robot model on the XLeRobot platform, simulated in Isaac Sim 5.1 with ManiSkill for arm manipulation"
+    ],
+    "stack": [
+      "ROS2",
+      "Isaac Sim 5.1",
+      "RTAB-Map",
+      "NVIDIA nvblox",
+      "ManiSkill",
+      "Intel RealSense D435",
+      "MPU-6050",
+      "Python"
+    ],
+    "media": [
+      {
+        "src": "videos/sortbots_slam.mp4",
+        "label": "Live RGB-D SLAM in Isaac Sim (RTAB-Map)"
+      }
     ]
   },
   {
@@ -34,11 +104,16 @@
     "type": "Research · Computer Vision",
     "accent": "#00d4aa",
     "category": "cv",
-    "featured": false,
+    "research": true,
     "icon": "detection",
     "github": "https://github.com/andrearante12/FineTune-YOLOW-UAS",
     "cardBlurb": "Fine-tuned YOLO-World for open-vocabulary obstruction detection on drone landing pads. Zero-shot generalization to unseen obstacle classes; paper in progress for AIAA SciTech 2027.",
-    "cardTags": ["YOLO-World", "Fine-tuning", "Jetson Xavier", "VisDrone"],
+    "cardTags": [
+      "YOLO-World",
+      "Fine-tuning",
+      "Jetson Xavier",
+      "VisDrone"
+    ],
     "description": [
       "Research project at GWU's IASL lab. Fine-tunes YOLO-World for real-time obstruction detection on UAS landing zones, enabling safe autonomous drone package delivery.",
       "The key advantage: open-vocabulary zero-shot generalization. New obstacle types (a bicycle, a person, debris) can be queried at inference time with natural language, requiring no retraining."
@@ -49,9 +124,21 @@
       "Deployed on NVIDIA Jetson Xavier and NVIDIA Jetson Orin Nano for real-time edge inference",
       "Research paper submission in progress for AIAA Scitech 2027: Open-Vocabulary UAS Landing Zone Obstruction Detection via Fine-Tuned YOLO-World"
     ],
-    "stack": ["YOLO-World", "MMCV", "PyTorch", "CLIP", "Jetson Xavier", "VisDrone", "Python", "CUDA"],
+    "stack": [
+      "YOLO-World",
+      "MMCV",
+      "PyTorch",
+      "CLIP",
+      "Jetson Xavier",
+      "VisDrone",
+      "Python",
+      "CUDA"
+    ],
     "media": [
-      { "src": "videos/yoloworld_demo.mp4", "label": "Finetuned version, retaining open-vocab capabilities" }
+      {
+        "src": "videos/yoloworld_demo.mp4",
+        "label": "Finetuned version, retaining open-vocab capabilities"
+      }
     ]
   },
   {
@@ -60,11 +147,16 @@
     "type": "Reinforcement Learning · Research",
     "accent": "#e3504a",
     "category": "rl",
-    "featured": false,
     "icon": "controller",
     "github": "https://github.com/andrearante12/vgc-bench",
-    "cardBlurb": "A Pokémon VGC teambuilding agent on VGC-Bench. Uses PSRO to build Gen 9 doubles teams that beat the current meta, evaluated against 739 real tournament teams and the top restricted cores.",
-    "cardTags": ["PSRO", "Self-Play RL", "PyTorch", "Poke-env", "Showdown"],
+    "cardBlurb": "A fork and extension of the VGC-Bench Pokémon benchmark that tackles competitive team building. It uses Policy Space Response Oracle search with evolutionary oracles to build competitive Reg I VGC teams optimized adversarily against a meta population.",
+    "cardTags": [
+      "PSRO",
+      "Self-Play RL",
+      "PyTorch",
+      "Poke-env",
+      "Showdown"
+    ],
     "description": [
       "A Pokémon VGC teambuilding agent built on VGC-Bench — a benchmark that solved battling agents but left team construction open. It uses PSRO (Policy-Space Response Oracles) to build Gen 9 doubles teams that beat the current meta.",
       "It targets Regulation I \"Limit Two Restricted\", evaluated against 739 real tournament teams and the top Miraidon / Calyrex / Koraidon cores, with battles run on a local Pokémon Showdown server."
@@ -76,9 +168,20 @@
       "Targets Regulation I \"Limit Two Restricted\" — evaluated against 739 real tournament teams and the top Miraidon / Calyrex / Koraidon cores",
       "Win-rate optimized over meta team pools; battles run on a local Pokémon Showdown server"
     ],
-    "stack": ["PyTorch", "PSRO", "Self-Play RL", "VGC-Bench", "Poke-env", "Showdown", "Python"],
+    "stack": [
+      "PyTorch",
+      "PSRO",
+      "Self-Play RL",
+      "VGC-Bench",
+      "Poke-env",
+      "Showdown",
+      "Python"
+    ],
     "media": [
-      { "src": "videos/vgc_demo.webm", "label": "PSRO-built team battling live on a Showdown server" }
+      {
+        "src": "videos/vgc_demo.webm",
+        "label": "PSRO-built team battling live on a Showdown server"
+      }
     ]
   },
   {
@@ -87,11 +190,16 @@
     "type": "Reinforcement Learning · Simulation",
     "accent": "#f5a623",
     "category": "rl",
-    "featured": false,
     "icon": "cube",
     "github": "https://github.com/andrearante12/Minecraft-Reinforcement-Learning",
-    "cardBlurb": "A modular framework on Project Malmo for training RL agents in fully customizable Minecraft environments. From-scratch PPO, imitation-learning demos, and curriculum learning toward zero-shot course generalization.",
-    "cardTags": ["PPO", "SB3", "Malmo", "Reinforcement Learning", "Imitation Learning"],
+    "cardBlurb": "A modular framework on Project Malmo for training RL agents in fully customizable Minecraft environments. Demo includes successful parkour and bridging agents, with ongoing work into integration with world models for longer horizon tasks such as hunting for food.",
+    "cardTags": [
+      "PPO",
+      "SB3",
+      "Malmo",
+      "Reinforcement Learning",
+      "Imitation Learning"
+    ],
     "description": [
       "A modular framework built on top of Project Malmo, an open source minecraft simulator to support training of Reinforcement Learning based agents in completely customizeable enviornments for specialized tasks.",
       "Demo includes an agent trained to complete Minecraft parkour courses, and an agent trained to bridge (build) in order to traverse open gaps."
@@ -101,11 +209,28 @@
       "Imitation Learning pipeline for recording expert trajectories simpily by playing Minecraft normally",
       "Fully customizeable curriculum learning roadmap: (Parkour example: flat gaps → multi-block gaps → angled landings → complex courses)"
     ],
-    "stack": ["PPO", "PyTorch", "Microsoft Malmo", "Python", "TCP Sockets", "Curriculum Learning", "Java"],
+    "stack": [
+      "PPO",
+      "PyTorch",
+      "Microsoft Malmo",
+      "Python",
+      "TCP Sockets",
+      "Curriculum Learning",
+      "Java"
+    ],
     "media": [
-      { "src": "videos/n_envs_demo.mp4", "label": "Parallel training is possible with n enviornments" },
-      { "src": "videos/90%_success_one_block_jump.mp4", "label": "Succesful parkour episode (1 block gap)" },
-      { "src": "videos/successful_diagonal_bridge.mp4", "label": "Succesful bridging episode (diagonal)" }
+      {
+        "src": "videos/n_envs_demo.mp4",
+        "label": "Parallel training is possible with n enviornments"
+      },
+      {
+        "src": "videos/one_block_jump_success.mp4",
+        "label": "Succesful parkour episode (1 block gap)"
+      },
+      {
+        "src": "videos/successful_diagonal_bridge.mp4",
+        "label": "Succesful bridging episode (diagonal)"
+      }
     ]
   },
   {
@@ -114,11 +239,16 @@
     "type": "IoT · Hardware",
     "accent": "#34d399",
     "category": "embedded",
-    "featured": false,
     "icon": "house",
     "github": "https://github.com/andrearante12/IoT-Smart-Home-Network",
     "cardBlurb": "Raspberry Pi based smart home with voice activation via Vosk, Zigbee/MQTT for light control, and a local web interface. Fully offline and private — no cloud.",
-    "cardTags": ["Raspberry Pi", "MQTT", "Zigbee", "Vosk", "Python"],
+    "cardTags": [
+      "Raspberry Pi",
+      "MQTT",
+      "Zigbee",
+      "Vosk",
+      "Python"
+    ],
     "description": [
       "A Raspberry Pi-based smart home network for remote control of smart lights through three interfaces: voice activation, physical switches, and a browser-based web UI — all running on local hardware.",
       "Zigbee devices communicate over MQTT via zigbee2mqtt. Voice commands are processed locally using the Vosk speech recognition toolkit, keeping the system fully offline with no cloud dependencies."
@@ -129,10 +259,26 @@
       "Fully local stack — no cloud APIs, all processing on Raspberry Pi",
       "Python backend handles command routing; HTML/JS frontend serves the web control panel"
     ],
-    "stack": ["Raspberry Pi", "MQTT", "Zigbee", "Vosk", "Python", "HTML/JS", "zigbee2mqtt"],
+    "stack": [
+      "Raspberry Pi",
+      "MQTT",
+      "Zigbee",
+      "Vosk",
+      "Python",
+      "HTML/JS",
+      "zigbee2mqtt"
+    ],
     "media": [
-      { "label": "Web control interface", "hint": "image or video", "icon": "◻" },
-      { "label": "Hardware setup", "hint": "image", "icon": "◻" }
+      {
+        "label": "Web control interface",
+        "hint": "image or video",
+        "icon": "◻"
+      },
+      {
+        "label": "Hardware setup",
+        "hint": "image",
+        "icon": "◻"
+      }
     ]
   }
 ]

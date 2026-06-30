@@ -38,6 +38,32 @@ body::before {
   z-index: 0;
 }
 
+/* Accent aurora — soft drifting glow tinted by the project's accent color */
+body::after {
+  content: '';
+  position: fixed;
+  inset: -15%;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 40% at 16% 10%, color-mix(in srgb, var(--project-accent, var(--accent)) 32%, transparent), transparent 72%),
+    radial-gradient(34% 36% at 86% 18%, color-mix(in srgb, var(--accent2) 18%, transparent), transparent 72%),
+    radial-gradient(46% 46% at 78% 92%, color-mix(in srgb, var(--project-accent, var(--accent)) 24%, transparent), transparent 72%);
+  filter: blur(70px) saturate(125%);
+  opacity: 0.38;
+  animation: aurora-drift 26s ease-in-out infinite alternate;
+}
+@keyframes aurora-drift {
+  from { transform: translate3d(-2%, -1.5%, 0) scale(1); }
+  to   { transform: translate3d(2.5%, 2%, 0) scale(1.1); }
+}
+
+/* Constellation canvas — drifting accent points + links, behind content */
+#project-bg {
+  position: fixed; inset: 0; z-index: 0;
+  pointer-events: none;
+}
+
 /* NAV */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -55,8 +81,8 @@ nav {
 /* PAGE LAYOUT */
 .project-page {
   position: relative; z-index: 1;
-  max-width: 920px; margin: 0 auto;
-  padding: 120px 40px 60px;
+  max-width: 1140px; margin: 0 auto;
+  padding: 120px 56px 60px;
 }
 
 .back-link {
@@ -82,6 +108,15 @@ nav {
   color: var(--project-accent, var(--accent));
   letter-spacing: 0.15em; text-transform: uppercase;
   margin-bottom: 16px;
+}
+.status-badge {
+  display: inline-block; vertical-align: middle;
+  margin-left: 12px; padding: 3px 9px;
+  border: 1px solid color-mix(in srgb, var(--project-accent, var(--accent)) 55%, transparent);
+  border-radius: 100px;
+  color: var(--project-accent, var(--accent));
+  font-size: 10px; letter-spacing: 0.12em;
+  background: color-mix(in srgb, var(--project-accent, var(--accent)) 12%, transparent);
 }
 .project-title {
   font-family: var(--display); font-size: clamp(40px, 6vw, 72px);
@@ -154,8 +189,8 @@ nav {
 .highlights-list { display: flex; flex-direction: column; gap: 12px; }
 .highlight-item {
   display: flex; gap: 14px; align-items: flex-start;
-  font-size: 15px; color: rgba(232,232,240,0.72);
-  line-height: 1.65;
+  font-size: 16.5px; color: rgba(232,232,240,0.8);
+  line-height: 1.7;
 }
 .highlight-item::before {
   content: '▸';
@@ -238,15 +273,57 @@ footer span {
   transition: left 0.05s, top 0.05s;
 }
 
+/* ── REFINED / COMPACT ── */
+.project-hero { margin-bottom: 36px; }
+.project-title { font-size: clamp(34px, 5vw, 54px); }
+
+.pp-block { margin: 36px 0; }
+.pp-para { font-size: 18px; color: rgba(232,232,240,0.82); line-height: 1.8; margin-bottom: 14px; }
+.pp-para:last-child { margin-bottom: 0; }
+
+/* Media gallery — one large item per row (the layout used on single-media pages) */
+.pp-gallery { display: flex; flex-direction: column; gap: 18px; }
+.pp-tile {
+  border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden; background: rgba(255,255,255,0.02);
+  display: flex; flex-direction: column;
+}
+.pp-tile > video,
+.pp-tile > img {
+  width: 100%; display: block; max-height: 70vh;
+  object-fit: contain; background: #000;
+}
+.pp-tile .media-embed { aspect-ratio: 16 / 9; padding-top: 0; height: auto; }
+.pp-tile .media-placeholder { aspect-ratio: 16 / 9; height: auto; }
+.pp-tile .media-caption { margin-top: auto; }
+
+/* Ghost action (e.g. Docs) */
+.action-btn.ghost {
+  background: transparent; color: var(--text);
+  border: 1px solid var(--border-hover); margin-left: 12px;
+}
+.action-btn.ghost:hover { border-color: var(--text); opacity: 1; }
+
+/* Subtle scroll reveal */
+.reveal { opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.reveal.visible { opacity: 1; transform: none; }
+
 /* RESPONSIVE */
 @media (max-width: 700px) {
   nav { padding: 0 20px; }
   .nav-links { gap: 18px; }
   .project-page { padding: 100px 24px 40px; }
+  .project-title { font-size: clamp(28px, 8vw, 40px); overflow-wrap: break-word; }
+  .pp-gallery { grid-template-columns: 1fr; }
   .project-prev-next { flex-direction: column; align-items: stretch; gap: 16px; }
   .prev-next-link { max-width: 100%; justify-content: space-between; }
   footer { padding: 24px 24px; flex-direction: column; gap: 8px; text-align: center; }
 }
 @media (max-width: 500px) {
   .nav-links { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
+  body::after { animation: none; }
+  html { scroll-behavior: auto; }
 }
