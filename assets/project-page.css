@@ -10,6 +10,7 @@
   --border-hover: rgba(255,255,255,0.14);
   --text: #e8e8f0;
   --muted: #6e6e88;
+  --text-soft: rgba(232,232,240,0.80);
   --accent: #6c63ff;
   --accent2: #00d4aa;
   --mono: 'DM Mono', monospace;
@@ -178,7 +179,7 @@ nav {
 .project-overview { margin-bottom: 48px; }
 .project-overview p {
   font-size: 16px;
-  color: rgba(232,232,240,0.78);
+  color: var(--text-soft);
   line-height: 1.8;
   margin-bottom: 14px;
 }
@@ -189,7 +190,7 @@ nav {
 .highlights-list { display: flex; flex-direction: column; gap: 12px; }
 .highlight-item {
   display: flex; gap: 14px; align-items: flex-start;
-  font-size: 16.5px; color: rgba(232,232,240,0.8);
+  font-size: 16.5px; color: var(--text-soft);
   line-height: 1.7;
 }
 .highlight-item::before {
@@ -278,7 +279,7 @@ footer span {
 .project-title { font-size: clamp(34px, 5vw, 54px); }
 
 .pp-block { margin: 36px 0; }
-.pp-para { font-size: 18px; color: rgba(232,232,240,0.82); line-height: 1.8; margin-bottom: 14px; }
+.pp-para { font-size: 18px; color: var(--text-soft); line-height: 1.8; margin-bottom: 14px; }
 .pp-para:last-child { margin-bottom: 0; }
 
 /* Media gallery — one large item per row (the layout used on single-media pages) */

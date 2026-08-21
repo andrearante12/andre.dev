@@ -105,30 +105,26 @@ Fine-Tuned YOLO-World'' submitted to \textit{AIAA SciTech 2027}, under review.}
     {Software Engineering Intern}{May 2026 -- Present}
     {Dell Technologies}{Austin, TX}
     \resumeItemListStart
-      \resumeItem{Built the physical execution layer for an agentic AI 
-  system by finetuning vision-language-action models (VLAs, such as $\pi_0$ and SmolVLA) 
-  via LoRA to translate natural language instructions into contact-rich robotic manipulation 
-  (keyboard macros, USB insertion) for autonomous hardware validation}
-\resumeItem{Extended the pipeline with HIL-SERL, training a custom residual 
-  RL policy that learns corrective actions ontop of a frozen VLA from real-time human 
-  feedback, improving task success}
+      \resumeItem{Fine-tuned vision-language-action foundational models ($\pi_0$ and SmolVLA) 
+  via LoRA on curated demonstration datasets for contact-rich manipulation tasks, building the data collection, curation, and SFT pipeline end-to-end 
+  in order to achieve autonomous hardware validation with robotic arms.}
+\resumeItem{Extended post training with human-in-the-loop RL, training a residual policy that learns corrective actions from real-time human feedback, demonstrating improved task success where supervised fine-tuning alone fails}
     \resumeItemListEnd
 
   \resumeSubheading
     {Undergraduate Research Intern}{Sep 2025 -- Present}
     {The George Washington University}{Washington, DC}
     \resumeItemListStart
-      % \resumeItem{Researching open-vocabulary obstruction detection for safe autonomous UAS landing}
-      \resumeItem{Ran experiments on the tradeoff between domain fine-tuning and open-vocabulary retention for open-vocabulary object detection models such as Yolo World and deployed for real-time landing zone obstruction detection for package delivery UAS drones in urban enviornments.}
-      % \resumeItem{Fine-tuned models on the VisDrone dataset to optimize object detection from a bird's-eye-view perspective}
-      \resumeItem{Built autonomous driving test environments using CARLA/SUMO to model highway merging scenarios}
+      \resumeItem{Ran experiments on the tradeoff between domain fine-tuning and open-vocabulary retention for open-vocabulary object detection models such as Yolo World and deployed for real-time, 
+      safety-critical landing zone obstruction detection for package delivery UAS drones in urban environments, achieved +149\% mAP over baseline.}
+      % \resumeItem{Built autonomous driving test environments using CARLA/SUMO to model highway merging scenarios}
     \resumeItemListEnd
 
   \resumeSubheading
   {Software Engineering Intern}{Feb 2024 -- Feb 2025}
   {C-3 Communication Systems, LLC}{Bethesda, MD}
   \resumeItemListStart
-    \resumeItem{Owned end-to-end development of an autonomous UGV platform, architecting a modular software stack that integrated computer vision, obstacle detection, and autonomous navigation into a unified control system.}
+    \resumeItem{Owned end-to-end development of an autonomous UGV platform on Linux, architecting a modular software stack that integrated computer vision, obstacle detection, and autonomous navigation into a unified control system.}
     % \resumeItem{Built a Flask-based command center serving live telemetry and sensor feedback for real-time monitoring and control}
     \resumeItem{Shipped and maintained a full-stack Operations Management System (HTML/CSS/JS, Firebase) in production for 1+ year, automating payroll, time tracking, and logistics workflows for a small startup}
   \resumeItemListEnd
@@ -159,7 +155,7 @@ Fine-Tuned YOLO-World'' submitted to \textit{AIAA SciTech 2027}, under review.}
   \resumeItemListStart
   %   \resumeItem{Designed and built a 6-DOF robotic arm that learns manipulation tasks from human demonstrations via imitation learning
   % and behavioral cloning}
-    \resumeItem{Developed a ROS 2 / C++ control stack integrating MoveIt2 for motion planning and MuJoCo for sim-to-real RL}
+    \resumeItem{Developed a ROS 2 / C++ control stack with forward/inverse kinematics and MoveIt2 for motion planning on a high-precision 6-DOF manipulator; integrated MuJoCo for sim-to-real RL training}
     \resumeItem{Built a custom wearable IMU-based teleoperation controller (ESP32 + MPU-6050) for real-time teleoperation}
   \resumeItemListEnd
 
@@ -167,7 +163,7 @@ Fine-Tuned YOLO-World'' submitted to \textit{AIAA SciTech 2027}, under review.}
   \resumeItemListStart
   %   \resumeItem{Built a modular RL training framework on top of Microsoft Malmo (open-source Minecraft simulator) supporting custom
   % environment design and multi-environment parallel training}
-    \resumeItem{Trained agents via Behavioral Cloning from human demonstrations using custom Python scripts to record Minecraft gameplay, then fine-tuned with actor-critic networks (PPO) to preform
+    \resumeItem{Trained agents via Behavioral Cloning from human demonstrations using custom Python scripts to record Minecraft gameplay, then fine-tuned with actor-critic networks (PPO) to perform
   Minecraft parkour and bridging tasks}
     % \resumeItem{Designed an imitation learning pipeline allowing expert trajectories to be recorded by playing Minecraft normally}
   \resumeItemListEnd
@@ -211,7 +207,7 @@ Fine-Tuned YOLO-World'' submitted to \textit{AIAA SciTech 2027}, under review.}
 \section{Technical Skills}
 \small{
   \textbf{ML \& Foundation Models:} PyTorch, CUDA, fine-tuning (SFT, RL, LORA), Weights \& Biases, vision-language models (CLIP, YOLO-World), vision-language-action models ($\pi_0$, SmolVLA) \\
-  \textbf{Robotics \& Deployment:} C/C++, Python, ROS~2, MuJoCo, OpenCV, NVIDIA Jetson, TensorRT, Linux, Git, Docker \\
+  \textbf{Robotics \& Deployment:} C/C++, Python, Rust, ROS~2, MuJoCo, NVIDIA Jetson, Linux, Git, Docker, Kinematics \\
 }
 
   \end{document}

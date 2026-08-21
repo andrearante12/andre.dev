@@ -180,11 +180,16 @@ if (canvas) {
   window.addEventListener('resize', resize);
 
   const clock = new THREE.Clock();
-  let running = true;
-  document.addEventListener('visibilitychange', () => {
-    running = !document.hidden;
-    if (running && !RM) { clock.start(); loop(); }
-  });
+  // The starfield is a night sky: it hides (see assets/theme.css) and idles
+  // under the cream light theme, then picks up again when dark comes back.
+  // The rAF loop keeps ticking either way and simply skips the GL work — far
+  // less brittle than tearing the loop down and restarting it.
+  const isLight = () => document.documentElement.getAttribute('data-theme') === 'light';
+  let running = !isLight();
+
+  function setRunning() { running = !document.hidden && !isLight(); }
+  document.addEventListener('visibilitychange', setRunning);
+  window.addEventListener('themechange', () => { setRunning(); resize(); });
 
   function render() {
     // scrolling down drifts the view gently upward (toward the horizon below)
@@ -196,8 +201,8 @@ if (canvas) {
   }
 
   function loop() {
-    if (!running) return;
     requestAnimationFrame(loop);
+    if (!running) return;
     const t = clock.getElapsedTime();
     mat.uniforms.uTime.value = t;
     points.rotation.y = t * 0.015;

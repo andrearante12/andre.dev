@@ -171,18 +171,20 @@
     ctx.restore();
   }
 
-  let running = true, frame = 0;
+  // Hidden on the cream light theme (white stars have no read on paper), so
+  // the loop idles there instead of drawing.
+  const isLight = () => document.documentElement.getAttribute('data-theme') === 'light';
+  let running = !isLight(), frame = 0;
   function loop() {
-    if (!running) return;
     requestAnimationFrame(loop);
+    if (!running) return;
     if ((frame++ % 30) === 0) refreshAccent();
     draw(true);
   }
 
-  document.addEventListener('visibilitychange', () => {
-    running = !document.hidden;
-    if (running && !RM) loop();
-  });
+  function setRunning() { running = !document.hidden && !isLight(); }
+  document.addEventListener('visibilitychange', setRunning);
+  window.addEventListener('themechange', setRunning);
   window.addEventListener('resize', resize);
 
   function start() {

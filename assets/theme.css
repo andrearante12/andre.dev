@@ -1,0 +1,222 @@
+/* ─────────────────────────────────────────────────────────────
+   Cream light theme + theme-toggle chrome.
+
+   Loaded on every page AFTER that page's own styles. Everything
+   here is scoped to :root[data-theme="light"] except the toggle
+   button itself, so the dark theme is untouched.
+
+   Palette is sampled from the cream project-writeup pages:
+     paper  #d8d2c4 · card #efe9db · ink #1c1a16
+     muted  #5c574e · rule #beb8ab · gold #b8934a
+   ───────────────────────────────────────────────────────────── */
+
+:root[data-theme="light"] {
+  --bg: #d8d2c4;          /* paper */
+  --bg2: #d0c9b9;         /* alternating band, one step darker */
+  --card: #efe9db;        /* raised surface / chips */
+  --border: rgba(38,32,22,0.16);
+  --border-hover: rgba(38,32,22,0.34);
+  --text: #1c1a16;        /* warm near-black ink */
+  --muted: #5c574e;
+  --text-soft: rgba(28,26,22,0.80);
+  --accent: #9c5a22;      /* terracotta — primary actions, labels */
+  --accent2: #2a6d5d;     /* deep teal — the dark theme's accent2 role */
+  --gold: #b8934a;        /* link underlines, hairline flourishes */
+  color-scheme: light;
+}
+
+/* Neon per-project accents are tuned for a black page; on cream they need
+   to be pushed toward ink wherever they carry text or fine linework. */
+:root[data-theme="light"] .project-card,
+:root[data-theme="light"] body {
+  --card-ink: color-mix(in srgb, var(--card-accent, var(--accent)) 58%, #1c1a16);
+  --project-ink: color-mix(in srgb, var(--project-accent, var(--accent)) 58%, #1c1a16);
+}
+
+/* ── THEME TOGGLE (both themes) ── */
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 12px;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s, background 0.2s;
+  line-height: 1;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--border-hover); }
+.theme-toggle svg { width: 13px; height: 13px; display: block; flex-shrink: 0; }
+.theme-toggle .tt-label { display: inline-block; }
+.nav-right { display: flex; align-items: center; gap: 20px; }
+@media (max-width: 700px) {
+  .theme-toggle .tt-label { display: none; }
+  .theme-toggle { padding: 6px 8px; }
+}
+/* The nav on index/project pages hides its whole link list on small screens —
+   keep the list itself displayed but show only the toggle. */
+@media (max-width: 600px) {
+  nav .nav-links { display: flex; }
+  nav .nav-links li:not(.nav-theme-item) { display: none; }
+}
+
+/* ══════════════════ SHARED CHROME ══════════════════ */
+
+:root[data-theme="light"] body::before { opacity: 0.28; } /* white noise reads heavy on cream */
+
+:root[data-theme="light"] nav {
+  background: rgba(216,210,196,0.88);
+  border-bottom-color: var(--border);
+}
+
+:root[data-theme="light"] .cursor-dot {
+  background: var(--accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 55%, transparent);
+}
+
+:root[data-theme="light"] footer { border-top-color: var(--border); }
+
+/* ══════════════════ INDEX ══════════════════ */
+
+/* The starfield is a night sky with no cream equivalent. In its place the page
+   becomes a drafting sheet: a fine ink grid with a heavier 96px major division,
+   fading out toward the bottom so the content keeps the upper hand.
+   (hero-bg.js also stops rendering while this theme is on.) */
+:root[data-theme="light"] #sky-canvas { display: none; }
+:root[data-theme="light"] .sky-glow {
+  background:
+    linear-gradient(rgba(28,26,22,0.07) 1px, transparent 1px) 0 0 / 96px 96px,
+    linear-gradient(90deg, rgba(28,26,22,0.07) 1px, transparent 1px) 0 0 / 96px 96px,
+    linear-gradient(rgba(28,26,22,0.035) 1px, transparent 1px) 0 0 / 16px 16px,
+    linear-gradient(90deg, rgba(28,26,22,0.035) 1px, transparent 1px) 0 0 / 16px 16px,
+    radial-gradient(70% 45% at 82% -10%, rgba(184,147,74,0.12), transparent 60%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 55%, rgba(0,0,0,0.35) 85%, transparent);
+  mask-image: linear-gradient(to bottom, #000 0 55%, rgba(0,0,0,0.35) 85%, transparent);
+}
+
+:root[data-theme="light"] h1.hero-name .accent-word {
+  -webkit-text-stroke: 1.5px rgba(28,26,22,0.30);
+}
+
+:root[data-theme="light"] .btn-primary { color: #fdf9f1; }
+:root[data-theme="light"] .btn-primary:hover { background: #b56b2c; }
+
+:root[data-theme="light"] .tag.active,
+:root[data-theme="light"] .proj-filter.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+:root[data-theme="light"] .proj-search {
+  background: var(--card);
+  color: var(--text);
+}
+
+/* Cards: on paper, depth comes from a shadow rather than a lighter fill. */
+:root[data-theme="light"] .project-card,
+:root[data-theme="light"] .pub {
+  background: var(--card);
+  box-shadow: 0 1px 2px rgba(38,32,22,0.06), 0 8px 20px -16px rgba(38,32,22,0.35);
+}
+:root[data-theme="light"] .project-card:hover {
+  box-shadow: 0 2px 4px rgba(38,32,22,0.08), 0 16px 30px -18px rgba(38,32,22,0.45);
+}
+:root[data-theme="light"] .project-card.featured {
+  background: linear-gradient(135deg, var(--card) 0%, #e6dece 100%);
+}
+:root[data-theme="light"] .project-icon {
+  background: rgba(38,32,22,0.05);
+  color: var(--card-ink, var(--accent));
+}
+:root[data-theme="light"] .project-type,
+:root[data-theme="light"] .project-tag {
+  background: rgba(38,32,22,0.06);
+}
+:root[data-theme="light"] .project-card.focused {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--card-ink, var(--accent)) 45%, transparent),
+              0 18px 40px -18px rgba(38,32,22,0.5);
+}
+/* Paper has far less contrast headroom than black — dimming the unfocused
+   cards as hard as the dark theme does makes them unreadable. */
+:root[data-theme="light"] .projects-grid.spotlight .project-card:not(.focused) {
+  opacity: 0.74; filter: saturate(0.85);
+}
+
+/* The spotlight's detector reticle becomes a plate registration mark: hairline
+   crop corners and a figure caption (the label text is swapped in index.html). */
+:root[data-theme="light"] .project-card .det-corner,
+:root[data-theme="light"] .project-card .det-tag { --bracket: var(--card-ink, var(--accent)); }
+:root[data-theme="light"] .project-card .det-corner { border-width: 1px; width: 13px; height: 13px; }
+:root[data-theme="light"] .det-tag {
+  background: transparent; border: 0; border-top: 1px solid currentColor;
+  border-radius: 0; padding: 3px 0 0; letter-spacing: 0.16em;
+}
+:root[data-theme="light"] .project-card .scanline {
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--card-ink, var(--accent)) 60%, transparent), transparent);
+  height: 1px;
+}
+:root[data-theme="light"] .project-card .focus-progress { background: var(--card-ink, var(--accent)); opacity: 0.55; }
+
+/* The hero scene swaps wholesale: night-sky observatory out, drafting sheet in
+   (both live in .scene in index.html). */
+:root[data-theme="light"] .observatory { display: none; }
+:root[data-theme="light"] .plate { display: block; }
+/* The cream scene is anchored to the header now, not the foot of the hero, so
+   it needs no bottom clearance of its own. */
+:root[data-theme="light"] .hero { padding-bottom: 120px; }
+
+:root[data-theme="light"] .hero-eyebrow { color: var(--muted); }
+:root[data-theme="light"] .hero-eyebrow::before { background: var(--accent); }
+
+/* ══════════════════ PROJECT DETAIL PAGES ══════════════════ */
+
+/* The accent aurora and the constellation canvas are both night-sky devices.
+   On paper the page carries the same drafting grid as the index hero instead. */
+:root[data-theme="light"] #project-bg { display: none; }
+:root[data-theme="light"] body::after {
+  inset: 0;
+  filter: none;
+  opacity: 1;
+  animation: none;
+  background:
+    linear-gradient(rgba(28,26,22,0.06) 1px, transparent 1px) 0 0 / 96px 96px,
+    linear-gradient(90deg, rgba(28,26,22,0.06) 1px, transparent 1px) 0 0 / 96px 96px,
+    linear-gradient(rgba(28,26,22,0.03) 1px, transparent 1px) 0 0 / 16px 16px,
+    linear-gradient(90deg, rgba(28,26,22,0.03) 1px, transparent 1px) 0 0 / 16px 16px,
+    radial-gradient(50% 40% at 84% 4%, color-mix(in srgb, var(--project-accent, var(--accent)) 14%, transparent), transparent 70%);
+  -webkit-mask-image: linear-gradient(to bottom, #000 0 40%, rgba(0,0,0,0.3) 70%, transparent);
+  mask-image: linear-gradient(to bottom, #000 0 40%, rgba(0,0,0,0.3) 70%, transparent);
+}
+/* the hero's accent bar reads as a drawing-sheet rule */
+:root[data-theme="light"] .hero-accent-bar { background: var(--project-ink, var(--accent)); }
+
+:root[data-theme="light"] .media-slot,
+:root[data-theme="light"] .pp-tile { background: rgba(38,32,22,0.03); }
+:root[data-theme="light"] .media-slot video,
+:root[data-theme="light"] .media-slot img,
+:root[data-theme="light"] .pp-tile > video,
+:root[data-theme="light"] .pp-tile > img { background: #cdc5b3; }
+
+:root[data-theme="light"] .project-eyebrow,
+:root[data-theme="light"] .highlight-item::before,
+:root[data-theme="light"] .prev-next-link .arrow { color: var(--project-ink, var(--accent)); }
+:root[data-theme="light"] .action-btn { color: #fdf9f1; }
+:root[data-theme="light"] .action-btn.ghost { color: var(--text); }
+:root[data-theme="light"] .status-badge {
+  color: var(--project-ink, var(--accent));
+  border-color: color-mix(in srgb, var(--project-ink, var(--accent)) 50%, transparent);
+  background: color-mix(in srgb, var(--project-ink, var(--accent)) 10%, transparent);
+}
+:root[data-theme="light"] .stack-tag { background: var(--card); }
+
+/* ══════════════════ PHOTOGRAPHY ══════════════════ */
+/* The lightbox stays dark in both themes — photos are viewed on black. */
+
+:root[data-theme="light"] .filter-bar { background: rgba(216,210,196,0.92); }
+:root[data-theme="light"] .photo-hero h1 span { -webkit-text-stroke: 1.5px rgba(28,26,22,0.28); }
+:root[data-theme="light"] .photo-item {
+  box-shadow: 0 1px 2px rgba(38,32,22,0.08), 0 10px 24px -18px rgba(38,32,22,0.5);
+}
+:root[data-theme="light"] .photo-placeholder { background: var(--card); }

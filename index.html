@@ -9,7 +9,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
 <script type="importmap">
-{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+{ "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  } }
 </script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -70,7 +73,7 @@
     min-height: 100vh; display: flex; flex-direction: column; justify-content: center;
     padding: 100px 80px 80px; position: relative; z-index: 1;
   }
-  /* one continuous, fixed sky shared by the hero + about (no seam between them) */
+  /* one continuous, fixed sky behind the hero + the sections below it */
   #sky-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
   .sky-glow {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -102,27 +105,23 @@
   .section-label::after { content: ''; flex: 1; max-width: 60px; height: 1px; background: var(--accent); opacity: 0.5; }
   h2.section-title { font-family: var(--display); font-size: clamp(36px,5vw,60px); font-weight: 700; line-height: 1.05; letter-spacing: -0.025em; margin-bottom: 56px; }
 
-  /* ABOUT */
-  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: start; }
-  .about-text p { color: var(--muted); margin-bottom: 16px; font-size: 16px; line-height: 1.75; }
-  .about-text p strong { color: var(--text); font-weight: 500; }
-  .about-stack { display: flex; flex-direction: column; gap: 24px; }
+  /* TOOLKIT — skill tags, closing the page just above Contact */
+  #stack { background: var(--bg2); padding-bottom: 0; }
+  #contact { padding-top: 72px; }
+  .stack-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 36px; align-items: start; max-width: 1060px; }
   .stack-group-label { font-family: var(--mono); font-size: 11px; color: var(--accent2); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
   .tags { display: flex; flex-wrap: wrap; gap: 8px; }
   .tag { font-family: var(--mono); font-size: 11px; padding: 5px 12px; border-radius: 3px; border: 1px solid var(--border); color: var(--muted); letter-spacing: 0.04em; transition: all 0.2s; }
   .tag:hover { border-color: var(--accent); color: var(--accent); }
   .tag.active { background: rgba(108,99,255,0.12); border-color: var(--accent); color: var(--accent); }
-  .about-links { display: flex; flex-wrap: wrap; gap: 10px; }
-  .about-link { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border: 1px solid var(--border); border-radius: 5px; text-decoration: none; color: var(--muted); font-family: var(--mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; transition: all 0.2s; }
-  .about-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
-  .about-link svg { width: 14px; height: 14px; flex-shrink: 0; }
 
-  /* ABOUT — transparent over the shared sky; the page "lands" on a horizon */
-  #about { overflow: hidden; padding-bottom: 340px; }
-  .about-grid { position: relative; z-index: 2; }
-  #about > .section-label, #about > .section-title { position: relative; z-index: 2; }
+  /* HERO SCENE — the page "lands" on a horizon at the bottom of the hero.
+     Dark theme shows the observatory; the cream theme swaps in a drafting
+     plate (see .plate below + assets/theme.css). */
+  .hero { overflow: hidden; padding-bottom: 360px; }
+  .hero-content { position: relative; z-index: 2; }
+  .scene { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
 
-  /* observatory: atmospheric horizon haze + layered ground + telescope */
   .observatory { position: absolute; left: 0; right: 0; bottom: 0; height: 300px; z-index: 1; pointer-events: none; }
   .observatory .haze {
     position: absolute; left: 0; right: 0; bottom: 90px; height: 230px;
@@ -133,12 +132,60 @@
   .observatory .ground { position: absolute; left: 0; right: 0; bottom: 0; width: 100%; height: 150px; display: block; }
   .observatory .telescope { position: absolute; bottom: 56px; right: 7%; width: 360px; height: 290px; display: block; }
 
+  /* narrow: the hero copy owns the column, so the whole plate steps out
+     (assets/so101.js also skips the model fetch below this width) */
+  @media (max-width: 760px) {
+    .plate { display: none !important; }
+  }
   @media (max-width: 600px) {
-    #about { padding-bottom: 250px; }
+    .hero { padding-bottom: 270px; }
     .observatory { height: 240px; }
     .observatory .haze { bottom: 72px; height: 170px; }
     .observatory .ground { height: 112px; }
     .observatory .telescope { width: 240px; height: 200px; right: 2%; bottom: 44px; }
+  }
+
+
+  /* ── DRAFTING PLATE (cream theme) ──
+     A datum rule set alongside the hero header, with the SO-101 standing on it.
+     `.plate`'s top edge IS the rule: assets/so101.js positions the canvas so
+     the robot's ground plane lands exactly there, whatever the camera does.
+     The vars below are what the ?debug panel drives. */
+  .plate { display: none; position: absolute; left: 0; right: 0; top: var(--datum-top, 46vh); height: 0; z-index: 1; pointer-events: none; }
+  .datum {
+    position: absolute; left: 0; right: 0; top: 0; height: 52px;
+    border-top: 1px solid rgba(28,26,22,0.55);
+    box-shadow: inset 0 4px 0 -3px rgba(28,26,22,0.30);
+    background: repeating-linear-gradient(45deg, rgba(28,26,22,0.22) 0 1px, transparent 1px 11px);
+    -webkit-mask-image: linear-gradient(to bottom, #000 0 26px, transparent 26px);
+    mask-image: linear-gradient(to bottom, #000 0 26px, transparent 26px);
+  }
+  /* the 3D robot; `top` is set from JS to seat it on the rule */
+  .arm-3d { position: absolute; right: var(--arm-right, 2%); width: var(--arm-w, 900px); height: var(--arm-h, 900px); display: block; opacity: 0; transition: opacity 0.8s ease; }
+  .arm-3d.is-loaded { opacity: 1; }
+  /* hand-drawn elevation: only shown if the model can't be rendered */
+  .arm-plate { position: absolute; right: 7%; bottom: 0; width: 520px; height: 300px; display: none; }
+  .plate.model-failed .arm-plate { display: block; }
+  .plate-caption { top: 64px; bottom: auto; }
+  .plate-caption {
+    position: absolute; right: 6%; text-align: right;
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.16em;
+    color: var(--muted); text-transform: uppercase;
+  }
+  .arm-plate .dim { stroke: var(--accent); fill: var(--accent); }
+  .arm-plate .dim line, .arm-plate .dim path { stroke: var(--accent); fill: none; stroke-width: 1; }
+  .arm-plate .dim .ext { opacity: 0.45; stroke-dasharray: 4 3; }
+  .arm-plate .dim text { font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; stroke: none; }
+
+  @media (max-width: 900px) {
+    .arm-plate { width: 400px; height: 231px; right: 3%; }
+    .plate-caption { font-size: 9px; }
+    .plate-caption { right: 3%; }
+  }
+  @media (max-width: 600px) {
+    .datum { height: 44px; }
+    .arm-plate { width: 310px; height: 179px; }
+    .plate-caption { right: 3%; }
   }
 
   /* PROJECTS */
@@ -273,23 +320,8 @@
     padding: 2px 8px; border-radius: 2px;
   }
 
-  /* HERO — name framed by an "autofocus lock-on" detection box */
-  .hero-namebox { position: relative; display: inline-block; margin-top: 14px; margin-bottom: 22px; }
+  .hero-namebox { display: inline-block; margin-top: 14px; margin-bottom: 30px; }
   .hero-namebox .hero-name { margin-bottom: 0; }
-  .hero-namebox .det-corner { transition: transform 0.6s cubic-bezier(.2,.9,.2,1), opacity 0.5s ease; opacity: 0; }
-  .hero-namebox .det-corner.tl { transform: translate(-22px,-22px); }
-  .hero-namebox .det-corner.tr { transform: translate(22px,-22px); }
-  .hero-namebox .det-corner.bl { transform: translate(-22px,22px); }
-  .hero-namebox .det-corner.br { transform: translate(22px,22px); }
-  .hero-namebox.locked .det-corner { opacity: 1; transform: translate(0,0); }
-  .hero-namebox .det-tag { opacity: 0; transition: opacity 0.3s 0.55s ease; }
-  .hero-namebox.locked .det-tag { opacity: 1; }
-
-  /* HERO — typed role line */
-  .hero-role { font-family: var(--mono); font-size: clamp(13px,1.6vw,16px); color: var(--accent2); letter-spacing: 0.03em; margin-bottom: 30px; min-height: 1.5em; }
-  .hero-role .prompt { opacity: 0.55; margin-right: 8px; }
-  .hero-role .caret { color: var(--accent2); animation: blink 1.05s steps(1) infinite; }
-  @keyframes blink { 50% { opacity: 0; } }
 
   /* PROJECT SPOTLIGHT — auto-cycling object detector */
   .projects-grid.spotlight .project-card:not(.focused) { opacity: 0.4; filter: saturate(0.5); }
@@ -321,8 +353,6 @@
   @keyframes dwell { from { width: 0; } to { width: 100%; } }
 
   @media (prefers-reduced-motion: reduce) {
-    .hero-namebox .det-corner, .hero-namebox .det-tag { transition: none; }
-    .hero-role .caret { animation: none; }
     .project-card.focused .scanline, .project-card.focused .focus-progress { animation: none; }
   }
 
@@ -330,8 +360,9 @@
   @media (max-width: 900px) {
     nav { padding: 0 24px; }
     .hero, section { padding: 80px 32px 60px; }
+    .hero { padding-bottom: 320px; }  /* keep the scene clear of the hero copy */
     footer { padding: 24px 32px; }
-    .about-grid { grid-template-columns: 1fr; gap: 40px; }
+    .stack-grid { grid-template-columns: 1fr; gap: 26px; }
     .projects-grid { grid-template-columns: 1fr 1fr; }
     .project-card.featured { grid-column: span 2; }
     h1.hero-name { font-size: 56px; }
@@ -349,6 +380,8 @@
     html { scroll-behavior: auto; }
   }
 </style>
+<link rel="stylesheet" href="assets/theme.css">
+<script src="assets/theme.js"></script>
 </head>
 <body>
 
@@ -360,7 +393,7 @@
 <nav>
   <a class="nav-logo" href="#">aa.dev</a>
   <ul class="nav-links">
-    <li><a href="#about">About</a></li>
+    <li><a href="#stack">Stack</a></li>
     <li><a href="#projects">Projects</a></li>
     <li><a href="#experience">Publications</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -369,166 +402,229 @@
 </nav>
 
 <section class="hero">
+  <div class="scene" aria-hidden="true">
+    <div class="observatory" aria-hidden="true">
+      <div class="haze"></div>
+      <svg class="ground" viewBox="0 0 1200 150" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#0a0a12"/>
+            <stop offset="1" stop-color="#111118"/>
+          </linearGradient>
+          <!-- cream-theme counterpart (see assets/theme.css) -->
+          <linearGradient id="gnd-light" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#c2b9a6"/>
+            <stop offset="1" stop-color="#d0c9b9"/>
+          </linearGradient>
+        </defs>
+        <!-- far ridge -->
+        <path class="gnd-far" d="M0,72 C260,54 430,80 660,62 C880,46 1040,74 1200,58 L1200,150 L0,150 Z" fill="#0c0c16"/>
+        <!-- near ground (blends down into the Projects section bg) -->
+        <path class="gnd-near" d="M0,98 C220,82 420,110 640,92 C860,74 1020,106 1200,88 L1200,150 L0,150 Z" fill="url(#gnd)"/>
+        <path class="gnd-edge" d="M0,98 C220,82 420,110 640,92 C860,74 1020,106 1200,88" fill="none" stroke="rgba(0,212,170,0.22)" stroke-width="1.5"/>
+      </svg>
+      <svg class="telescope" viewBox="0 0 420 320" preserveAspectRatio="xMidYMax meet">
+        <defs>
+          <linearGradient id="scope-beam" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="rgba(0,212,170,0)"/>
+            <stop offset="1" stop-color="rgba(0,212,170,0.6)"/>
+          </linearGradient>
+          <radialGradient id="lens-glow" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="rgba(0,212,170,0.9)"/>
+            <stop offset="1" stop-color="rgba(0,212,170,0)"/>
+          </radialGradient>
+          <filter id="scope-glow" x="-300%" y="-300%" width="700%" height="700%">
+            <feGaussianBlur stdDeviation="2.8" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- target star + sight line the scope is aimed at -->
+        <line x1="346" y1="49" x2="369" y2="23" stroke="url(#scope-beam)" stroke-width="2.5" opacity="0.65"/>
+        <circle cx="372" cy="19" r="4" fill="#fff" filter="url(#scope-glow)"/>
+
+        <!-- ground contact shadow -->
+        <ellipse cx="232" cy="304" rx="78" ry="9" fill="#000" opacity="0.45"/>
+
+        <!-- tripod -->
+        <g stroke="#10101c" stroke-width="7" stroke-linecap="round">
+          <line x1="230" y1="186" x2="176" y2="300"/>
+          <line x1="230" y1="186" x2="290" y2="300"/>
+          <line x1="232" y1="190" x2="238" y2="306"/>
+        </g>
+        <!-- accent rim light down the front legs -->
+        <g stroke="rgba(0,212,170,0.30)" stroke-width="1.6" stroke-linecap="round">
+          <line x1="228" y1="190" x2="178" y2="296"/>
+          <line x1="232" y1="190" x2="288" y2="296"/>
+        </g>
+        <!-- accessory tray -->
+        <path d="M196,250 L264,250 L256,262 L204,262 Z" fill="#0e0e18"/>
+
+        <!-- equatorial mount head + counterweight -->
+        <rect x="212" y="168" width="36" height="26" rx="6" fill="#13131f" stroke="rgba(108,99,255,0.3)" stroke-width="1.5"/>
+        <line x1="240" y1="190" x2="272" y2="224" stroke="#13131f" stroke-width="6" stroke-linecap="round"/>
+        <circle cx="275" cy="227" r="9" fill="#15152200" stroke="rgba(108,99,255,0.4)" stroke-width="2"/>
+        <circle cx="275" cy="227" r="9" fill="#131320"/>
+
+        <!-- optical tube assembly, aimed up at the star -->
+        <g transform="rotate(-48 230 178)">
+          <!-- dovetail + tube rings -->
+          <rect x="206" y="190" width="118" height="8" rx="3" fill="#0e0e18"/>
+          <rect x="236" y="168" width="9" height="32" rx="3" fill="#0e0e18"/>
+          <rect x="300" y="168" width="9" height="32" rx="3" fill="#0e0e18"/>
+          <!-- main tube -->
+          <rect x="214" y="163" width="172" height="30" rx="15" fill="#13131f"/>
+          <!-- dew shield + objective lens (front, up-sky end) -->
+          <rect x="378" y="159" width="28" height="38" rx="9" fill="#16162c"/>
+          <ellipse cx="404" cy="178" rx="6" ry="16" fill="url(#lens-glow)"/>
+          <ellipse cx="404" cy="178" rx="6" ry="16" fill="none" stroke="rgba(0,212,170,0.55)" stroke-width="1.5"/>
+          <!-- rim light along the top edge -->
+          <path d="M220,164 H398" fill="none" stroke="rgba(0,212,170,0.4)" stroke-width="1.6" stroke-linecap="round"/>
+          <path d="M222,192 H384" fill="none" stroke="rgba(108,99,255,0.25)" stroke-width="1.4" stroke-linecap="round"/>
+          <!-- focuser + eyepiece (back, eye end) -->
+          <rect x="206" y="180" width="16" height="24" rx="3" fill="#10101c"/>
+          <rect x="200" y="200" width="22" height="11" rx="3" fill="#13131f"/>
+          <!-- finder scope -->
+          <rect x="270" y="148" width="74" height="9" rx="4" fill="#0e0e18"/>
+          <rect x="340" y="146" width="8" height="13" rx="2" fill="#10101c"/>
+          <line x1="286" y1="157" x2="286" y2="163" stroke="#0e0e18" stroke-width="4"/>
+          <line x1="326" y1="157" x2="326" y2="163" stroke="#0e0e18" stroke-width="4"/>
+        </g>
+      </svg>
+    </div>
+    <!-- cream theme: the same corner of the page, drawn as a drafting sheet -->
+    <div class="plate">
+      <div class="datum"></div>
+      <canvas id="so101-canvas" class="arm-3d"></canvas>
+      <svg class="arm-plate" viewBox="0 0 520 300" preserveAspectRatio="xMidYMax meet">
+        <defs>
+          <linearGradient id="arm-body" x1="0" y1="0" x2="0.4" y2="1">
+            <stop offset="0" stop-color="#4e4736"/>
+            <stop offset="1" stop-color="#332e23"/>
+          </linearGradient>
+          <linearGradient id="arm-base" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#4a4433"/>
+            <stop offset="1" stop-color="#2b271d"/>
+          </linearGradient>
+          <radialGradient id="arm-led" cx="0.5" cy="0.5" r="0.5">
+            <stop offset="0" stop-color="#2a6d5d" stop-opacity="0.9"/>
+            <stop offset="1" stop-color="#2a6d5d" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- drafting overlay, kept quiet so the model reads first -->
+        <g class="dim">
+          <line class="ext" x1="404" y1="60" x2="404" y2="34"/>
+          <line x1="208" y1="28" x2="404" y2="28"/>
+          <line x1="204" y1="34" x2="212" y2="22"/>
+          <line x1="400" y1="34" x2="408" y2="22"/>
+          <text x="306" y="18" text-anchor="middle">480</text>
+          <line class="ext" x1="428" y1="86" x2="486" y2="86"/>
+          <line x1="480" y1="86" x2="480" y2="298"/>
+          <line x1="474" y1="92" x2="486" y2="80"/>
+          <line x1="474" y1="298" x2="486" y2="286"/>
+          <text x="472" y="196" text-anchor="middle" transform="rotate(-90 472 196)">620</text>
+        </g>
+        <line x1="208" y1="120" x2="208" y2="306" stroke="#2a6d5d" stroke-width="1" opacity="0.4" stroke-dasharray="14 5 2 5"/>
+
+        <!-- contact shadow on the datum -->
+        <ellipse cx="206" cy="298" rx="88" ry="9" fill="#8d836c" opacity="0.35"/>
+
+        <!-- ── plinth ── -->
+        <path d="M152,298 L260,298 L260,262 Q260,257 255,257 L157,257 Q152,257 152,262 Z" fill="url(#arm-base)"/>
+        <path d="M157,257 L255,257 Q260,257 260,262 L260,266 L152,266 L152,262 Q152,257 157,257 Z" fill="#57503d"/>
+        <path d="M158,259 L254,259" stroke="rgba(247,242,232,0.30)" stroke-width="1.5" stroke-linecap="round"/>
+        <g fill="#241f18" opacity="0.7">
+          <circle cx="166" cy="288" r="2.6"/><circle cx="246" cy="288" r="2.6"/>
+          <circle cx="166" cy="274" r="2.6"/><circle cx="246" cy="274" r="2.6"/>
+        </g>
+
+        <!-- ── rotating turret ── -->
+        <path d="M176,257 L236,257 L236,214 Q236,208 230,208 L182,208 Q176,208 176,214 Z" fill="url(#arm-body)"/>
+        <ellipse cx="206" cy="209" rx="30" ry="8" fill="#544c3a"/>
+        <path d="M180,212 Q206,203 232,212" fill="none" stroke="rgba(247,242,232,0.32)" stroke-width="1.6" stroke-linecap="round"/>
+        <rect x="184" y="228" width="38" height="15" rx="3" fill="#241f18" opacity="0.4"/>
+        <circle cx="230" cy="236" r="9" fill="url(#arm-led)"/>
+        <circle cx="230" cy="236" r="2.6" fill="#2a6d5d"/>
+
+        <!-- ── shoulder yoke ── -->
+        <path d="M188,214 L226,214 L221,176 L193,176 Z" fill="#4a4335"/>
+        <path d="M193,176 L221,176 L220,182 L194,182 Z" fill="rgba(247,242,232,0.16)"/>
+
+        <!-- cable, running behind the arm -->
+        <path d="M220,206 C 240,196 236,172 252,150 C 264,134 272,120 280,110" fill="none" stroke="#9c5a22" stroke-width="2.2" opacity="0.45" stroke-linecap="round"/>
+
+        <!-- ── upper arm ── -->
+        <line x1="207" y1="170" x2="286" y2="92" stroke="#332e23" stroke-width="42" stroke-linecap="round"/>
+        <line x1="207" y1="170" x2="286" y2="92" stroke="url(#arm-body)" stroke-width="34" stroke-linecap="round"/>
+        <line x1="197" y1="160" x2="276" y2="82" stroke="rgba(247,242,232,0.30)" stroke-width="3.5" stroke-linecap="round"/>
+        <g stroke="#241f18" stroke-width="1.6" opacity="0.4">
+          <line x1="230" y1="141" x2="248" y2="159"/>
+          <line x1="245" y1="126" x2="263" y2="144"/>
+        </g>
+
+        <!-- ── forearm ── -->
+        <line x1="286" y1="92" x2="384" y2="72" stroke="#332e23" stroke-width="32" stroke-linecap="round"/>
+        <line x1="286" y1="92" x2="384" y2="72" stroke="url(#arm-body)" stroke-width="25" stroke-linecap="round"/>
+        <line x1="290" y1="80" x2="380" y2="62" stroke="rgba(247,242,232,0.28)" stroke-width="3" stroke-linecap="round"/>
+        <line x1="332" y1="76" x2="336" y2="96" stroke="#241f18" stroke-width="1.6" opacity="0.4"/>
+
+        <!-- ── joints, drawn over the links so the axes read ── -->
+        <g>
+          <circle cx="207" cy="170" r="21" fill="#443d2f"/>
+          <circle cx="207" cy="170" r="13" fill="#57503d"/>
+          <circle cx="207" cy="170" r="4.5" fill="#9c5a22"/>
+          <path d="M193,159 A 21,21 0 0 1 213,150" fill="none" stroke="rgba(247,242,232,0.35)" stroke-width="2" stroke-linecap="round"/>
+
+          <circle cx="286" cy="92" r="18" fill="#443d2f"/>
+          <circle cx="286" cy="92" r="11" fill="#57503d"/>
+          <circle cx="286" cy="92" r="4" fill="#9c5a22"/>
+          <path d="M274,83 A 18,18 0 0 1 292,75" fill="none" stroke="rgba(247,242,232,0.35)" stroke-width="2" stroke-linecap="round"/>
+
+          <circle cx="384" cy="72" r="13" fill="#443d2f"/>
+          <circle cx="384" cy="72" r="7" fill="#57503d"/>
+          <circle cx="384" cy="72" r="2.6" fill="#9c5a22"/>
+        </g>
+
+        <!-- eye-in-hand camera, mounted on the forearm behind the wrist -->
+        <g transform="rotate(-11 352 60)">
+          <rect x="340" y="46" width="24" height="16" rx="3" fill="#3a3428"/>
+          <rect x="340" y="46" width="24" height="4" rx="2" fill="rgba(247,242,232,0.22)"/>
+          <rect x="360" y="50" width="7" height="9" rx="2" fill="#2c281f"/>
+          <circle cx="366" cy="54.5" r="2.8" fill="#2a6d5d"/>
+          <circle cx="366" cy="54.5" r="1.1" fill="#d7ece5"/>
+        </g>
+
+        <!-- ── two-finger gripper: jaw, lower finger, the part, upper finger ── -->
+        <g transform="rotate(-11 400 70)">
+          <rect x="392" y="58" width="20" height="26" rx="4" fill="url(#arm-body)"/>
+          <rect x="392" y="58" width="20" height="5" rx="2.5" fill="rgba(247,242,232,0.20)"/>
+        </g>
+        <line x1="412" y1="80" x2="448" y2="73" stroke="#3a3428" stroke-width="6.5" stroke-linecap="round"/>
+        <g transform="rotate(-11 452 63)">
+          <rect x="438" y="49" width="27" height="27" rx="3" fill="#cfc7b3" stroke="#2c281f" stroke-width="1.6"/>
+          <path d="M438,58 L465,58" stroke="#2c281f" stroke-width="1" opacity="0.35"/>
+        </g>
+        <line x1="410" y1="57" x2="446" y2="50" stroke="#3a3428" stroke-width="6.5" stroke-linecap="round"/>
+        <line x1="412" y1="55" x2="442" y2="49" stroke="rgba(247,242,232,0.22)" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <p class="plate-caption">FIG. 1 — SO-ARM101 · 6-DOF MANIPULATOR · LIVE MODEL</p>
+    </div>
+  </div>
+
   <div class="hero-content">
     <p class="hero-eyebrow">Computer Engineering @ GWU · Class of '27</p>
-    <div class="hero-namebox" id="namebox">
-      <span class="det-corner tl"></span><span class="det-corner tr"></span><span class="det-corner bl"></span><span class="det-corner br"></span>
+    <div class="hero-namebox">
       <h1 class="hero-name">Andre<br><span class="accent-word">Arante</span></h1>
     </div>
-    <p class="hero-role"><span class="prompt">&gt;</span><span id="role-text"></span><span class="caret">▋</span></p>
-    <p class="hero-tagline">Focused on <strong>computer vision</strong>, <strong>reinforcement learning</strong>, and <strong>robotic systems</strong> — from simulation to real-world implementation.</p>
+    <p class="hero-tagline">Focused on <strong>computer vision</strong>, <strong>reinforcement learning</strong>, and <strong>robotic systems</strong> — from simulation to hardware. I research <strong>safe autonomous landing for UAS</strong> at GWU's Intelligent Aerospace Systems Lab.</p>
     <div class="hero-cta">
       <a class="btn btn-primary" href="resume/resume.pdf?v=f363d7d" target="_blank" rel="noopener">Resume ↗</a>
       <a class="btn btn-ghost" href="#projects">View Projects</a>
       <a class="btn btn-ghost" href="https://github.com/andrearante12" target="_blank" rel="noopener">GitHub →</a>
+      <a class="btn btn-ghost" href="https://www.linkedin.com/in/andre-arante" target="_blank" rel="noopener">LinkedIn →</a>
     </div>
-  </div>
-</section>
 
-<section id="about">
-  <div class="observatory" aria-hidden="true">
-    <div class="haze"></div>
-    <svg class="ground" viewBox="0 0 1200 150" preserveAspectRatio="none">
-      <defs>
-        <linearGradient id="gnd" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stop-color="#0a0a12"/>
-          <stop offset="1" stop-color="#111118"/>
-        </linearGradient>
-      </defs>
-      <!-- far ridge -->
-      <path d="M0,72 C260,54 430,80 660,62 C880,46 1040,74 1200,58 L1200,150 L0,150 Z" fill="#0c0c16"/>
-      <!-- near ground (blends down into the Projects section bg) -->
-      <path d="M0,98 C220,82 420,110 640,92 C860,74 1020,106 1200,88 L1200,150 L0,150 Z" fill="url(#gnd)"/>
-      <path d="M0,98 C220,82 420,110 640,92 C860,74 1020,106 1200,88" fill="none" stroke="rgba(0,212,170,0.22)" stroke-width="1.5"/>
-    </svg>
-    <svg class="telescope" viewBox="0 0 420 320" preserveAspectRatio="xMidYMax meet">
-      <defs>
-        <linearGradient id="scope-beam" x1="0" y1="1" x2="1" y2="0">
-          <stop offset="0" stop-color="rgba(0,212,170,0)"/>
-          <stop offset="1" stop-color="rgba(0,212,170,0.6)"/>
-        </linearGradient>
-        <radialGradient id="lens-glow" cx="0.5" cy="0.5" r="0.5">
-          <stop offset="0" stop-color="rgba(0,212,170,0.9)"/>
-          <stop offset="1" stop-color="rgba(0,212,170,0)"/>
-        </radialGradient>
-        <filter id="scope-glow" x="-300%" y="-300%" width="700%" height="700%">
-          <feGaussianBlur stdDeviation="2.8" result="b"/>
-          <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
-      <!-- target star + sight line the scope is aimed at -->
-      <line x1="346" y1="49" x2="369" y2="23" stroke="url(#scope-beam)" stroke-width="2.5" opacity="0.65"/>
-      <circle cx="372" cy="19" r="4" fill="#fff" filter="url(#scope-glow)"/>
-
-      <!-- ground contact shadow -->
-      <ellipse cx="232" cy="304" rx="78" ry="9" fill="#000" opacity="0.45"/>
-
-      <!-- tripod -->
-      <g stroke="#10101c" stroke-width="7" stroke-linecap="round">
-        <line x1="230" y1="186" x2="176" y2="300"/>
-        <line x1="230" y1="186" x2="290" y2="300"/>
-        <line x1="232" y1="190" x2="238" y2="306"/>
-      </g>
-      <!-- accent rim light down the front legs -->
-      <g stroke="rgba(0,212,170,0.30)" stroke-width="1.6" stroke-linecap="round">
-        <line x1="228" y1="190" x2="178" y2="296"/>
-        <line x1="232" y1="190" x2="288" y2="296"/>
-      </g>
-      <!-- accessory tray -->
-      <path d="M196,250 L264,250 L256,262 L204,262 Z" fill="#0e0e18"/>
-
-      <!-- equatorial mount head + counterweight -->
-      <rect x="212" y="168" width="36" height="26" rx="6" fill="#13131f" stroke="rgba(108,99,255,0.3)" stroke-width="1.5"/>
-      <line x1="240" y1="190" x2="272" y2="224" stroke="#13131f" stroke-width="6" stroke-linecap="round"/>
-      <circle cx="275" cy="227" r="9" fill="#15152200" stroke="rgba(108,99,255,0.4)" stroke-width="2"/>
-      <circle cx="275" cy="227" r="9" fill="#131320"/>
-
-      <!-- optical tube assembly, aimed up at the star -->
-      <g transform="rotate(-48 230 178)">
-        <!-- dovetail + tube rings -->
-        <rect x="206" y="190" width="118" height="8" rx="3" fill="#0e0e18"/>
-        <rect x="236" y="168" width="9" height="32" rx="3" fill="#0e0e18"/>
-        <rect x="300" y="168" width="9" height="32" rx="3" fill="#0e0e18"/>
-        <!-- main tube -->
-        <rect x="214" y="163" width="172" height="30" rx="15" fill="#13131f"/>
-        <!-- dew shield + objective lens (front, up-sky end) -->
-        <rect x="378" y="159" width="28" height="38" rx="9" fill="#16162c"/>
-        <ellipse cx="404" cy="178" rx="6" ry="16" fill="url(#lens-glow)"/>
-        <ellipse cx="404" cy="178" rx="6" ry="16" fill="none" stroke="rgba(0,212,170,0.55)" stroke-width="1.5"/>
-        <!-- rim light along the top edge -->
-        <path d="M220,164 H398" fill="none" stroke="rgba(0,212,170,0.4)" stroke-width="1.6" stroke-linecap="round"/>
-        <path d="M222,192 H384" fill="none" stroke="rgba(108,99,255,0.25)" stroke-width="1.4" stroke-linecap="round"/>
-        <!-- focuser + eyepiece (back, eye end) -->
-        <rect x="206" y="180" width="16" height="24" rx="3" fill="#10101c"/>
-        <rect x="200" y="200" width="22" height="11" rx="3" fill="#13131f"/>
-        <!-- finder scope -->
-        <rect x="270" y="148" width="74" height="9" rx="4" fill="#0e0e18"/>
-        <rect x="340" y="146" width="8" height="13" rx="2" fill="#10101c"/>
-        <line x1="286" y1="157" x2="286" y2="163" stroke="#0e0e18" stroke-width="4"/>
-        <line x1="326" y1="157" x2="326" y2="163" stroke="#0e0e18" stroke-width="4"/>
-      </g>
-    </svg>
-  </div>
-  <p class="section-label">About</p>
-  <h2 class="section-title">Who I am</h2>
-  <div class="about-grid fade-in">
-    <div class="about-text">
-      <p>I'm an undergraduate computer engineering student at George Washington University with a deep focus on <strong>robotics</strong>, <strong>computer vision</strong>, and applications of <strong>Reinforcement Learning</strong> to games. My work spans the full stack
-        — from training neural networks to wiring servos and electrical components.</p>
-      <p>
-        Currently, I work in the Intelligent Aerospace Systems Lab (IASL) at GWU, where my current research focuses on <strong>safe autonomous landing for UAS systems</strong>. My paper, "Open-Vocabulary UAS Delivery Zone Obstruction Detection via
-Fine-Tuned YOLO-World" is planned to be submitted to the AIAA SciTech Forum 2027.
-        </p>
-      <p>
-        Previously at IASL, I have worked on <strong>autonomous vehicle simulations</strong> such as CARLA and SUMO, integrated using OpenCDA. As an intern at C-3 Comm Systems LLC, I handled
-     <strong>full-stack web development</strong> by implementing and maintaining an internal Operations Management System and built <strong>autonomous UGV systems</strong> powered by Nvidia Jetson.
-         Outside of work, I'm currently building: a 6-DOF robotic arm, RL agents in Minecraft, and custom voice controlled smart home systems.
-      </p>
-    </div>
-    <div class="about-stack">
-      <div>
-        <p class="stack-group-label">ML / AI</p>
-        <div class="tags">
-          <span class="tag active">Reinforcement Learning (SB3)</span><span class="tag active">PyTorch</span>
-          <span class="tag">TensorFlow</span><span class="tag">PPO</span>
-        </div>
-      </div>
-      <div>
-        <p class="stack-group-label">Robotics</p>
-        <div class="tags">
-          <span class="tag active">ROS2</span><span class="tag">MoveIt2</span>
-          <span class="tag">Jetson Orin / Xavier</span><span class="tag">MuJoCo</span>
-          <span class="tag">Robotic Arm</span><span class="tag">UGV</span>
-        </div>
-      </div>
-      <div>
-        <p class="stack-group-label">Languages & Tools</p>
-        <div class="tags">
-          <span class="tag active">Python</span><span class="tag active">C/C++</span>
-          <span class="tag">Java</span><span class="tag">JavaScript</span>
-          <span class="tag">Flask / Django</span><span class="tag">React</span>
-          <span class="tag">Docker</span><span class="tag">Linux</span>
-        </div>
-      </div>
-      <div>
-        <p class="stack-group-label">Links</p>
-        <div class="about-links">
-          <a class="about-link" href="resume/resume.pdf?v=f363d7d" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
-            Resume
-          </a>
-          <a class="about-link" href="https://github.com/andrearante12" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
-            GitHub
-          </a>
-          <a class="about-link" href="https://www.linkedin.com/in/andre-arante" target="_blank" rel="noopener">
-            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z"/><circle cx="4" cy="4" r="2"/></svg>
-            LinkedIn
-          </a>
-        </div>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -568,6 +664,36 @@ Fine-Tuned YOLO-World" is planned to be submitted to the AIAA SciTech Forum 2027
 
 <div class="section-divider"></div>
 
+<section id="stack">
+  <p class="section-label">Toolkit</p>
+  <div class="stack-grid fade-in">
+    <div>
+      <p class="stack-group-label">ML / AI</p>
+      <div class="tags">
+        <span class="tag active">Reinforcement Learning (SB3)</span><span class="tag active">PyTorch</span>
+        <span class="tag">TensorFlow</span><span class="tag">PPO</span>
+      </div>
+    </div>
+    <div>
+      <p class="stack-group-label">Robotics</p>
+      <div class="tags">
+        <span class="tag active">ROS2</span><span class="tag">MoveIt2</span>
+        <span class="tag">Jetson Orin / Xavier</span><span class="tag">MuJoCo</span>
+        <span class="tag">Robotic Arm</span><span class="tag">UGV</span>
+      </div>
+    </div>
+    <div>
+      <p class="stack-group-label">Languages &amp; Tools</p>
+      <div class="tags">
+        <span class="tag active">Python</span><span class="tag active">C/C++</span>
+        <span class="tag">Java</span><span class="tag">JavaScript</span>
+        <span class="tag">Flask / Django</span><span class="tag">React</span>
+        <span class="tag">Docker</span><span class="tag">Linux</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section id="contact">
   <div class="contact-inner fade-in">
     <p class="section-label" style="justify-content:center">Contact</p>
@@ -596,6 +722,7 @@ Fine-Tuned YOLO-World" is planned to be submitted to the AIAA SciTech Forum 2027
 
 <script src="assets/icons.js"></script>
 <script type="module" src="assets/hero-bg.js"></script>
+<script type="module" src="assets/so101.js"></script>
 <script>
 /* ── PROJECT FILTER / SEARCH ── */
 let activeFilter = 'all';
@@ -655,42 +782,6 @@ window.addEventListener('scroll', () => {
   navLinks.forEach(a => { a.style.color = a.getAttribute('href') === '#' + current ? 'var(--text)' : ''; });
 });
 
-/* ── PERCEPTION THEME: hero lock-on + role typing ── */
-(function () {
-  const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const namebox = document.getElementById('namebox');
-  if (namebox) {
-    if (RM) namebox.classList.add('locked');
-    else setTimeout(() => namebox.classList.add('locked'), 450);
-  }
-
-  const roleEl = document.getElementById('role-text');
-  const ROLES = ['Robotics Engineer', 'Computer Vision', 'Reinforcement Learning', 'Autonomous Systems'];
-  if (roleEl) {
-    if (RM) {
-      roleEl.textContent = ROLES.join(' · ');
-    } else {
-      let ri = 0, ci = 0, deleting = false;
-      const tick = () => {
-        const word = ROLES[ri];
-        if (!deleting) {
-          ci++;
-          roleEl.textContent = word.slice(0, ci);
-          if (ci === word.length) { deleting = true; setTimeout(tick, 1600); return; }
-          setTimeout(tick, 70);
-        } else {
-          ci--;
-          roleEl.textContent = word.slice(0, ci);
-          if (ci === 0) { deleting = false; ri = (ri + 1) % ROLES.length; setTimeout(tick, 320); return; }
-          setTimeout(tick, 38);
-        }
-      };
-      setTimeout(tick, 900);
-    }
-  }
-})();
-
 /* ── RENDER PROJECT CARDS from projects.json, then start the spotlight ── */
 (async function renderProjects() {
   const grid = document.getElementById('projects-grid');
@@ -708,8 +799,10 @@ window.addEventListener('scroll', () => {
   const card = p => {
     const icon = ICONS[p.icon] || ICONS.default || '';
     const tags = (p.cardTags || []).map(t => `<span class="project-tag">${esc(t)}</span>`).join('');
-    const href = p.github || `projects/${p.slug}.html`;
-    const ext = p.github ? ' target="_blank" rel="noopener"' : '';
+    // `site` = a full write-up hosted in this repo, and it outranks the
+    // GitHub link: it is the better landing page when one exists.
+    const href = p.site || p.github || `projects/${p.slug}.html`;
+    const ext = (!p.site && p.github) ? ' target="_blank" rel="noopener"' : '';
     return `<a class="project-card fade-in" data-category="${esc(p.category)}" style="--card-accent:${esc(p.accent || '#6c63ff')}" href="${esc(href)}"${ext}>
       <div class="project-icon" aria-hidden="true">${icon}</div>
       <div class="project-meta"><span class="project-type">${esc(p.type)}</span><span class="project-arrow">↗</span></div>
@@ -745,13 +838,27 @@ function initSpotlight() {
   let started = false, paused = false;
   const visible = () => cards.filter(c => !c.classList.contains('hidden'));
 
+  // Dark reads as a detector confidence readout; cream reads as a figure
+  // number on a drawing sheet. Re-labelled live when the theme flips.
+  function labelTag(c) {
+    if (!c || !c._tag) return;
+    const title = (c.querySelector('.project-title') || {}).textContent || 'project';
+    const i = cards.indexOf(c);
+    if (document.documentElement.getAttribute('data-theme') === 'light') {
+      c._tag.textContent = 'FIG. ' + String(i + 2).padStart(2, '0') + ' · ' + title.toUpperCase();
+    } else {
+      c._tag.textContent = '◉ ' + title + ' · ' + (0.90 + (i % 9) / 100).toFixed(2);
+    }
+  }
+  window.addEventListener('themechange', () => cards.forEach(c => {
+    if (c.classList.contains('focused')) labelTag(c);
+  }));
+
   function setFocus(c) {
     cards.forEach(x => x.classList.remove('focused'));
     if (!c) return;
     c.classList.add('focused');
-    const title = (c.querySelector('.project-title') || {}).textContent || 'project';
-    const conf = (0.90 + (cards.indexOf(c) % 9) / 100).toFixed(2);
-    c._tag.textContent = '◉ ' + title + ' · ' + conf;
+    labelTag(c);
     const bar = c.querySelector('.focus-progress');
     if (bar) { bar.style.animation = 'none'; void bar.offsetWidth; bar.style.animation = ''; }
   }
