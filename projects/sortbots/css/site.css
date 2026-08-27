@@ -1,0 +1,634 @@
+@import url("tokens.css");
+
+/* ─────────────────────────────────────────────────────────────
+   SortBots write-up — layout system.
+
+   Same visual language as projects/minecraft/ and projects/imitationarm/
+   (Bricolage Grotesque / Source Serif 4 / IBM Plex Mono, cream paper, dark
+   console chrome, dark-stroke SVG figures on a cream plate). Authored
+   cream-first; css/portfolio.css adds the dark token-swap and the shared
+   aa.dev / theme-toggle chrome on top.
+   ───────────────────────────────────────────────────────────── */
+
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 4.5rem;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--limestone);
+  font-family: var(--font-body);
+  font-size: 1.0625rem;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+img, svg, canvas, video { display: block; max-width: 100%; }
+
+a { color: var(--link); text-underline-offset: 0.18em; }
+a:hover { color: var(--ink); }
+
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+.skip {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  background: var(--accent);
+  color: var(--console);
+  padding: 0.4rem 0.7rem;
+  z-index: 20;
+}
+.skip:focus { top: 0.75rem; }
+
+/* ── nav bar ────────────────────────────────────────────── */
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 1.25rem;
+  background: var(--console);
+  color: #eef2f6;                 /* console is dark in both themes — fixed light text */
+  border-bottom: 3px solid var(--console-3);
+}
+
+.brand {
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hud);
+  text-decoration: none;
+}
+.brand:hover { color: var(--accent); }
+
+.slots {
+  display: flex;
+  gap: 0.35rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.slots a {
+  display: block;
+  min-width: 6.6rem;
+  padding: 0.45rem 0.7rem 0.4rem;
+  text-align: center;
+  text-decoration: none;
+  color: #c2ccd6;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  background: var(--console-3);
+  border: 2px solid #171a1e;
+  box-shadow: inset 1px 1px 0 #444a52, inset -1px -1px 0 #14161a;
+}
+
+.slots a:hover,
+.slots a[aria-current="page"] {
+  color: var(--console);
+  background: var(--accent);
+  border-color: #2f5f7d;
+  box-shadow: inset 1px 1px 0 #b9e0f6, inset -1px -1px 0 #2f6d92;
+}
+
+/* ── hero ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  background: var(--console);
+  color: #f1eadf;                 /* console-dark in both themes — fixed light text */
+  min-height: min(84vh, 44rem);
+  overflow: hidden;
+}
+
+.hero-stage { position: relative; height: min(84vh, 44rem); }
+
+.hero-still {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.6;
+}
+
+/* scrim so the bottom-left copy stays legible over the photo */
+.hero-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(to top, rgba(15, 18, 22, 0.92) 0%, rgba(15, 18, 22, 0.35) 42%, rgba(15, 18, 22, 0.55) 100%);
+}
+
+.hero-copy {
+  position: absolute;
+  z-index: 1;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: 1.75rem;
+  max-width: 40rem;
+}
+
+.hero-copy h1 {
+  margin: 0 0 0.6rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(2.1rem, 5vw, 3.6rem);
+  letter-spacing: -0.03em;
+  line-height: 0.98;
+}
+
+.hero-copy p {
+  margin: 0;
+  max-width: 34rem;
+  color: #cdd6df;
+  font-size: 1.15rem;
+}
+
+.hero-hint {
+  position: absolute;
+  z-index: 1;
+  right: 1.25rem;
+  bottom: 1.75rem;
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--hud-dim);
+}
+
+/* ── work bands (overview) ──────────────────────────────── */
+.work {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 2.5rem;
+  align-items: center;
+  padding: 4.5rem 1.5rem;
+  max-width: var(--max);
+  margin: 0 auto;
+  border-top: 1px solid var(--line);
+}
+
+.work:nth-of-type(even) {
+  grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+}
+.work:nth-of-type(even) .work-copy { order: 2; }
+.work:nth-of-type(even) .work-media { order: 1; }
+
+.kicker {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+}
+
+.work h2 {
+  margin: 0 0 0.75rem;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.5rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+
+.work p { margin: 0 0 1rem; color: var(--muted); }
+
+.more {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  color: var(--ink);
+  border-bottom: 2px solid var(--accent);
+  padding-bottom: 0.1rem;
+}
+.more:hover { color: var(--link); }
+
+.work-media {
+  position: relative;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  min-height: 15rem;
+  overflow: hidden;
+}
+.work-media svg { width: 100%; height: auto; }
+.work-media img,
+.work-media video {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  background: var(--console);
+}
+
+.clip-kicker {
+  position: absolute;
+  top: 0.7rem;
+  left: 0.85rem;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  z-index: 1;
+}
+
+.clip-slot { position: relative; overflow: hidden; }
+.clip-slot video { width: 100%; height: 100%; object-fit: cover; }
+
+.clip-fallback {
+  display: none;
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  padding: 1.2rem;
+  align-items: flex-end;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--muted);
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(78, 168, 222, 0.05) 10px,
+      rgba(78, 168, 222, 0.05) 11px
+    );
+}
+.clip-slot.is-empty > p.clip-fallback { display: flex; }
+.clip-slot.is-empty video { display: none; }
+
+/* ── shared: facts chips ────────────────────────────────── */
+.facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1.2rem;
+  padding: 0;
+  list-style: none;
+}
+.facts li {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  padding: 0.28rem 0.5rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+}
+
+/* ── footer ─────────────────────────────────────────────── */
+.foot {
+  padding: 1.4rem 1.5rem 2rem;
+  border-top: 1px solid var(--line);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.foot a { color: var(--muted); }
+.foot a:hover { color: var(--ink); }
+.foot .foot-links a:not(:last-child) { margin-right: 0.75rem; }
+
+/* ── deep-dive page shell ───────────────────────────────── */
+.page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+.page-wide { max-width: 74rem; }
+.page-wide > :not(.diagram):not(.scrubber):not(.wide) { max-width: 46rem; }
+
+.back {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  text-decoration: none;
+  color: var(--muted);
+}
+.back:hover { color: var(--ink); }
+
+.page h1 {
+  margin: 0.9rem 0 0.6rem;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  letter-spacing: -0.03em;
+  line-height: 1.05;
+}
+.page .lede {
+  font-size: 1.15rem;
+  color: var(--muted);
+  margin: 0 0 1.6rem;
+}
+.page .lede em { color: var(--ink); font-style: italic; }
+.page h2 {
+  margin: 2.4rem 0 0.55rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+}
+.page h3 {
+  margin: 1.5rem 0 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+}
+.page p { margin: 0 0 1rem; }
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.86em;
+  background: rgba(28, 26, 22, 0.06);
+  padding: 0.1em 0.38em;
+  border-radius: 4px;
+  overflow-wrap: anywhere;
+}
+
+/* ── split cards ────────────────────────────────────────── */
+.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 0 0 1.4rem;
+}
+.card {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 0.9rem 1rem;
+}
+.card h3 {
+  margin: 0 0 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+  font-weight: 500;
+}
+.card ul { margin: 0; padding: 0 0 0 1.1rem; color: var(--muted); }
+.card p { margin: 0; color: var(--muted); font-size: 0.95rem; }
+
+/* ── stat band ──────────────────────────────────────────── */
+.stat-band {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.7rem;
+  margin: 0 0 1.6rem;
+}
+.stat-band div {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 0.75rem 0.85rem;
+}
+.stat-band strong {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.stat-band span {
+  display: block;
+  margin-top: 0.3rem;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── spec tables ────────────────────────────────────────── */
+.table-wrap { overflow-x: auto; margin: 0 0 1.4rem; }
+.spec {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  margin: 0;
+}
+.spec th, .spec td {
+  text-align: left;
+  padding: 0.4rem 0.7rem 0.4rem 0;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+.spec th {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+  font-weight: 500;
+}
+.spec td { color: var(--muted); }
+.spec td:first-child {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* ── code plate ─────────────────────────────────────────── */
+.code-block {
+  background: var(--console);
+  color: #e6ecf2;
+  border: 1px solid var(--console-3);
+  padding: 1.1rem 1.2rem;
+  margin: 0 0 1.4rem;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  line-height: 1.65;
+  white-space: pre;
+}
+.code-block .cm { color: var(--hud-dim); }
+
+/* ── notes ──────────────────────────────────────────────── */
+.note {
+  font-size: 0.93rem;
+  color: var(--muted);
+  border-left: 3px solid var(--accent);
+  padding: 0.2rem 0 0.2rem 0.9rem;
+  margin: 1.6rem 0;
+}
+.note.caution { border-left-color: var(--intent); }
+.note .note-date {
+  display: block;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--accent-dim);
+  margin-bottom: 0.35rem;
+}
+.note.caution .note-date { color: var(--intent); }
+.note h4 { margin: 0 0 0.35rem; font-size: 1rem; font-weight: 600; color: var(--ink); }
+.note p { margin: 0; }
+
+.notes-head {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--accent-dim);
+  margin: 2.6rem 0 0;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--line);
+}
+
+/* ── diagrams (inline SVG, dark strokes on a cream plate) ── */
+.diagram {
+  margin: 1.6rem 0;
+  padding: 1.2rem 1rem 0.4rem;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  overflow-x: auto;
+}
+.diagram svg { width: 100%; min-width: 460px; height: auto; }
+.diagram figcaption {
+  margin: 0.8rem 0.1rem 0.7rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--muted);
+  max-width: 70ch;
+}
+
+/* The .diagram plate is pinned cream in both themes (see portfolio.css), so
+   everything drawn on it uses literal colours, never the themed tokens. */
+.dg-box { fill: #e4ddcc; stroke: rgba(28, 26, 22, 0.4); stroke-width: 1.2; }
+.dg-box--data { fill: #dcecf6; stroke: #7fb4d4; }
+.dg-box--intent { fill: #f5e3cd; stroke: #d6a463; }
+.dg-label { font-family: var(--font-body); font-size: 12px; font-weight: 600; fill: #1c1a16; }
+.dg-sub { font-family: var(--font-mono); font-size: 8.6px; fill: #5c574e; }
+.dg-edge { fill: none; stroke: #0a84c4; stroke-width: 1.7; }
+.dg-edge--intent { stroke: #c9781f; }
+.dg-edge-label { font-family: var(--font-mono); font-size: 8.4px; fill: #5c574e; }
+.dg-legend {
+  display: flex;
+  gap: 1.4rem;
+  flex-wrap: wrap;
+  margin: 0.9rem 0.1rem 0.2rem;
+}
+.dg-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: var(--font-mono);
+  font-size: 0.64rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.dg-legend i { width: 15px; height: 2px; border-radius: 2px; }
+
+/* toggle diagram: groups tagged data-v are faded when they don't match the
+   svg's data-view. Ships with data-view="all" so it is complete without JS. */
+.diagram svg [data-v] { transition: opacity 0.2s ease; }
+.diagram svg[data-view="robot"] [data-v]:not([data-v~="robot"]),
+.diagram svg[data-view="fleet"] [data-v]:not([data-v~="fleet"]) { opacity: 0.12; }
+
+.routes {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0 0.1rem 0.75rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+}
+.routes-label { margin-right: 0.15rem; letter-spacing: 0.12em; color: #5c574e; }
+.route-btn {
+  font: inherit;
+  padding: 0.3rem 0.6rem;
+  color: #5c574e;
+  background: #fdfbf6;
+  border: 1px solid rgba(28, 26, 22, 0.18);
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.route-btn:hover { color: #1c1a16; border-color: rgba(28, 26, 22, 0.42); }
+.route-btn.is-on { color: #fdfbf6; background: #1c1a16; border-color: #1c1a16; }
+.route-btn:focus-visible { outline: 2px solid #3a7fac; outline-offset: 2px; }
+
+/* ── map-progress scrubber (navigation page) ────────────── */
+.scrubber {
+  background: var(--paper);
+  border: 1px solid var(--line);
+  padding: 1.2rem;
+  margin: 1.6rem 0;
+}
+.scrubber-stage {
+  background: var(--limestone);
+  border: 1px solid var(--line);
+  display: flex;
+  justify-content: center;
+  padding: 1rem;
+  min-height: 240px;
+}
+.scrubber-stage img {
+  height: 220px;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.scrubber-controls {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.1rem;
+}
+.scrubber input[type="range"] { flex: 1; accent-color: var(--data); }
+.scrubber-readout {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.scrubber-readout b { color: var(--ink); font-weight: 600; }
+.scrubber .scrubber-note {
+  margin: 0.9rem 0 0;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+/* ── responsive ─────────────────────────────────────────── */
+@media (max-width: 820px) {
+  .work,
+  .work:nth-of-type(even) { grid-template-columns: 1fr; }
+  .work:nth-of-type(even) .work-copy,
+  .work:nth-of-type(even) .work-media { order: unset; }
+  .split { grid-template-columns: 1fr; }
+  .stat-band { grid-template-columns: 1fr 1fr; }
+  .slots a { min-width: 0; padding: 0.4rem 0.45rem; font-size: 0.64rem; }
+  .hero-hint { display: none; }
+  .scrubber-controls { flex-direction: column; align-items: stretch; gap: 0.7rem; }
+  .scrubber-readout { white-space: normal; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Multi-robot coordination &amp; the communication protocol — SortBots — Andre Arante</title>
+  <meta name="description" content="SortBots' stated novel contribution: a mesh radio that shares position, motion intent, task status and obstructions; decentralized location-based task allocation; priority-yield collision avoidance with no centralized path planning; and a central task manager kept in the loop for oversight and fallback." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/portfolio.css" />
+  <script src="../../assets/theme.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="bar-left">
+      <a class="bar-home" href="../../index.html">← aa.dev</a>
+      <span class="sep">/</span>
+      <a class="brand" href="index.html">SortBots</a>
+    </div>
+    <nav aria-label="Subsystems">
+      <ul class="slots">
+        <li><a href="perception.html">Perception</a></li>
+        <li><a href="navigation.html">Navigation</a></li>
+        <li><a href="coordination.html" aria-current="page">Coordination</a></li>
+        <li><a href="interfaces.html">Interfaces</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="page page-wide">
+    <a class="back" href="index.html">← Overview</a>
+    <h1>Only what they're told.</h1>
+    <p class="lede">
+      This is the project's stated novel contribution, and the standing invariant of the
+      whole fleet design: <em>autonomy never looks up a peer on the transform tree.</em>
+      That would work perfectly in simulation and be a lie about the real warehouse. Each
+      robot broadcasts where it is and where it is going — and that radio is the only
+      peer information any decision may use.
+    </p>
+
+    <div class="stat-band">
+      <div><strong>5 Hz</strong><span>status broadcast</span></div>
+      <div><strong>&lt;150 ms</strong><span>wireless latency budget</span></div>
+      <div><strong>~150 ms</strong><span>software e-stop</span></div>
+      <div><strong>0</strong><span>peer lookups on /tf</span></div>
+    </div>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 1000 320" role="img" aria-label="Two robots each broadcast on /fleet/status and /fleet/intent; a yield decision reads both channels.">
+        <defs>
+          <marker id="ar-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#0a84c4" />
+          </marker>
+          <marker id="ar-intent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#c9781f" />
+          </marker>
+        </defs>
+        <path class="dg-edge" d="M210 75 C 280 75, 300 75, 360 75" marker-end="url(#ar-data)" />
+        <path class="dg-edge" d="M210 245 C 280 245, 300 245, 360 245" marker-end="url(#ar-data)" />
+        <path class="dg-edge dg-edge--intent" d="M210 96 C 300 120, 300 210, 360 235" marker-end="url(#ar-intent)" />
+        <path class="dg-edge dg-edge--intent" d="M210 224 C 300 200, 300 100, 360 85" marker-end="url(#ar-intent)" />
+        <path class="dg-edge" d="M540 75 C 620 75, 640 140, 700 158" marker-end="url(#ar-data)" />
+        <path class="dg-edge dg-edge--intent" d="M540 245 C 620 245, 640 182, 700 164" marker-end="url(#ar-intent)" />
+
+        <g>
+          <rect class="dg-box" x="35" y="46" width="175" height="58" rx="10" />
+          <text class="dg-label" x="122" y="70" text-anchor="middle">robot_0</text>
+          <text class="dg-sub" x="122" y="86" text-anchor="middle">fleet_radio + explorer</text>
+        </g>
+        <g>
+          <rect class="dg-box" x="35" y="216" width="175" height="58" rx="10" />
+          <text class="dg-label" x="122" y="240" text-anchor="middle">robot_1</text>
+          <text class="dg-sub" x="122" y="256" text-anchor="middle">fleet_radio + explorer</text>
+        </g>
+        <g>
+          <rect class="dg-box dg-box--data" x="360" y="46" width="180" height="58" rx="10" />
+          <text class="dg-label" x="450" y="70" text-anchor="middle">/fleet/status</text>
+          <text class="dg-sub" x="450" y="86" text-anchor="middle">BEST_EFFORT · volatile</text>
+        </g>
+        <g>
+          <rect class="dg-box dg-box--intent" x="360" y="216" width="180" height="58" rx="10" />
+          <text class="dg-label" x="450" y="240" text-anchor="middle">/fleet/intent</text>
+          <text class="dg-sub" x="450" y="256" text-anchor="middle">RELIABLE · transient local</text>
+        </g>
+        <g>
+          <rect class="dg-box" x="700" y="132" width="180" height="58" rx="10" />
+          <text class="dg-label" x="790" y="156" text-anchor="middle">yield decision</text>
+          <text class="dg-sub" x="790" y="172" text-anchor="middle">corridor intersection test</text>
+        </g>
+      </svg>
+      <div class="dg-legend">
+        <span><i style="background:#0a84c4"></i>self-reported state</span>
+        <span><i style="background:#c9781f"></i>intent &amp; yield</span>
+      </div>
+      <figcaption>A shared broadcast bus standing in for a mesh radio. Nothing on it is authoritative — it is what each robot says about itself. Topics are deliberately <em>not</em> namespaced.</figcaption>
+    </figure>
+
+    <h2>The two channels</h2>
+    <p>
+      <code>fleet_radio.py</code> is both a runnable broadcaster and an importable
+      protocol module — the explorer and the offline tests share its encode/parse
+      helpers. Messages are <code>std_msgs/String</code> carrying JSON; the repo defines
+      no custom message types anywhere.
+    </p>
+    <pre class="code-block"><span class="cm">// /fleet/status — 5 Hz, best effort</span>
+{"robot_id": "robot_0",
+ "pose":  {"x": -7.15, "y": 11.62, "yaw": 0.31},
+ "twist": {"vx": 0.42, "wz": 0.0},
+ "mode":  "explore",          <span class="cm">// idle | explore | stuck</span>
+ "stamp": 1754...}
+
+<span class="cm">// /fleet/intent — on change, replayed to late joiners</span>
+{"robot_id": "robot_1",
+ "goal":     {"x": 2.4, "y": 15.1},
+ "corridor": [[1.2, 13.7], [1.9, 14.4]],   <span class="cm">// optional polyline</span>
+ "priority": 1,                             <span class="cm">// lower outranks</span>
+ "expires_at": 1754...,
+ "released": true}                          <span class="cm">// release carries only id + flag</span></pre>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>Channel</th><th>Reliability</th><th>Durability</th><th>Reasoning</th></tr></thead>
+        <tbody>
+          <tr><td>/fleet/status</td><td>BEST_EFFORT</td><td>volatile</td><td>a stale pose is worse than none — never resend an old position</td></tr>
+          <tr><td>/fleet/intent</td><td>RELIABLE</td><td>transient local</td><td>a robot joining late must still learn which corridors are claimed</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      What the fleet shares over this radio: position estimates, motion intent, task
+      status, and detected obstructions. The wireless link is budgeted for under
+      150&nbsp;ms end-to-end, and a software emergency stop propagates to a robot in
+      roughly the same time — the status channel doubles as the liveness signal a
+      halt rides on.
+    </p>
+
+    <h2>Yield logic</h2>
+    <p>
+      This is <em>not</em> multi-agent path planning. No robot plans around another
+      robot's route. Intent creates soft keepouts that bias frontier scoring away from a
+      claimed corridor, plus a yield gate that makes the lower-priority robot wait.
+    </p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>Step</th><th>Behaviour</th></tr></thead>
+        <tbody>
+          <tr><td>Priority</td><td>derived from the robot id; peers ranked below us are ignored entirely</td></tr>
+          <tr><td>Conflict test</td><td>segment intersection between our start→goal leg and the peer's corridor polyline, with a 0.6 m pad</td></tr>
+          <tr><td>Degenerate case</td><td>a peer intent with no corridor falls back to a disc test around its goal</td></tr>
+          <tr><td>On conflict</td><td>suppress our own goal for 3 s and re-plan; peers also act as soft keepouts during scoring</td></tr>
+          <tr><td>Expiry</td><td>double TTL — wall-clock <code>expires_at</code> and monotonic receive age must both hold</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Decentralized task allocation</h2>
+    <p>
+      Work is divided by location, not by a central dispatcher assigning routes. Robots
+      draw from a shared task queue and claim the jobs nearest them, announcing the claim
+      on the radio; if a unit stalls or is obstructed, its uncompleted work returns to
+      the pool and another robot picks it up. A central task manager stays in the loop —
+      not to plan motion, but for global oversight, queue health, and a fallback path if
+      coordination degrades.
+    </p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>task_manager state</th><th>Leaves on</th><th>Notes</th></tr></thead>
+        <tbody>
+          <tr><td>IDLE</td><td>a task dispatched and the explorer idle</td><td>stops the explorer first; both drive the one <code>navigate_to_pose</code> server</td></tr>
+          <tr><td>NAV_TO_PICKUP → PICKING</td><td>arrival, then <code>pick_result</code></td><td>30 s safety timeout if nothing is listening</td></tr>
+          <tr><td>NAV_TO_DROPOFF → PLACING</td><td>arrival, then <code>pick_result</code></td><td></td></tr>
+          <tr><td>FAILED</td><td>nav abort/reject or pick failure</td><td>returns to IDLE rather than stalling the queue</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="notes-head">Field notes</p>
+    <div class="note">
+      <span class="note-date">Field note</span>
+      <h4>The pose oracle we refused to build</h4>
+      <p>
+        Autonomy must never look up another robot's frame on the transform tree. It would
+        work perfectly in simulation and be unimplementable on real hardware, and it
+        would quietly invalidate every multi-robot result the project produces. Peers are
+        visible in exactly two ways — as anonymous moving obstacles when the depth camera
+        happens to see them, and as self-reported broadcasts on the radio.
+      </p>
+    </div>
+    <div class="note">
+      <span class="note-date">Diagnosed live · 2026-08-02</span>
+      <h4>Every timeout cancelled its own replacement</h4>
+      <p>
+        The navigation action takes one goal at a time, so sending a new goal already
+        preempts the old one. The explorer was also explicitly cancelling first — and the
+        cancel is processed asynchronously, so it reliably landed <em>after</em> the
+        replacement became active and cancelled that instead. Compounding it, a preempted
+        goal's late "aborted" result was read against whichever goal was current by the
+        time it arrived, so the explorer blacklisted a target it was actively driving to.
+        Fixed with a generation counter that lets stale callbacks no-op, and by never
+        cancelling a goal that is about to be replaced.
+      </p>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>SortBots · coordination &amp; comms</span>
+    <span class="foot-links">
+      <a href="index.html">Overview</a>
+      <a href="../../index.html">andre.dev</a>
+      <a href="https://github.com/andrearante12/SortBots">Repository</a>
+    </span>
+  </footer>
+</body>
+</html>

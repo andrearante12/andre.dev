@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SortBots — a warehouse robot fleet that maps as it moves — Andre Arante</title>
+  <meta name="description" content="A senior-capstone fleet of autonomous mobile robots for indoor logistics: per-robot RGB-D SLAM, frontier exploration on a fused map, a decentralized coordination radio, and a web dashboard — built on XLeRobot in Isaac Sim and ROS 2." />
+  <meta property="og:title" content="SortBots" />
+  <meta property="og:description" content="A fleet of warehouse robots that map a building they have never seen, agree on what they found, and stay out of each other's way." />
+  <meta property="og:image" content="media/warehouse-hero.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/portfolio.css" />
+  <script src="../../assets/theme.js"></script>
+</head>
+<body>
+  <a class="skip" href="#perception">Skip to the subsystems</a>
+
+  <header class="bar">
+    <div class="bar-left">
+      <a class="bar-home" href="../../index.html">← aa.dev</a>
+      <span class="sep">/</span>
+      <a class="brand" href="#top">SortBots</a>
+    </div>
+    <nav aria-label="Subsystems">
+      <ul class="slots">
+        <li><a href="perception.html">Perception</a></li>
+        <li><a href="navigation.html">Navigation</a></li>
+        <li><a href="coordination.html">Coordination</a></li>
+        <li><a href="interfaces.html">Interfaces</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="hero" id="top">
+    <div class="hero-stage">
+      <img class="hero-still" src="media/warehouse-hero.jpg" alt="The simulated warehouse the fleet explores, in Isaac Sim" />
+      <div class="hero-copy">
+        <h1>Map a building you have never seen.</h1>
+        <p>A fleet of mobile robots for indoor logistics that deploys in minutes — no per-facility infrastructure, no pre-built map. They map as they move, agree on what they found, and stay out of each other's way.</p>
+      </div>
+      <p class="hero-hint">Simulated in Isaac Sim · ROS 2 Jazzy · built on XLeRobot</p>
+    </div>
+  </section>
+
+  <section class="work" id="perception">
+    <div class="work-copy">
+      <p class="kicker">Per-robot perception &amp; mapping</p>
+      <h2>One camera, two kinds of truth.</h2>
+      <p>No lidar. A single head-mounted RGB-D camera has to both build the map and notice what is moving in front of it. A dynamic-obstacle filter erases movers from the mapper's copy and republishes them on their own channel — the map keeps the building, the navigator keeps the traffic. RTAB-Map runs per robot for visual-inertial SLAM and a 3D reconstruction.</p>
+      <ul class="facts">
+        <li>RTAB-Map RGB-D SLAM</li>
+        <li>RealSense D435 · IMU · odometry</li>
+        <li>movers → NaN, kept out of the grid</li>
+      </ul>
+      <a class="more" href="perception.html">How perception &amp; mapping work</a>
+    </div>
+    <div class="work-media">
+      <img src="media/maps/final.png" alt="An occupancy grid built during an exploration run — dark cells occupied, tinted cells confirmed free, flat background still unknown" />
+    </div>
+  </section>
+
+  <section class="work" id="navigation">
+    <div class="work-copy">
+      <p class="kicker">Navigation &amp; exploration</p>
+      <h2>Turn, then go — toward the edge of the known.</h2>
+      <p>Nobody hands the fleet a map. Each robot drives Nav2 (MPPI, differential-drive) toward the best-scored frontier — a free cell touching unknown space — on a <em>fused</em> grid that any robot has contributed to. The 2D <code>/map</code> and 3D <code>/fleet/recon_cloud</code> are merged from known spawn anchors: collaborative fusion, not collaborative SLAM.</p>
+      <ul class="facts">
+        <li>Nav2 MPPI · 15 cm goal tolerance</li>
+        <li>frontier exploration on the fused map</li>
+        <li>occupied &gt; free &gt; unknown merge</li>
+      </ul>
+      <a class="more" href="navigation.html">How navigation &amp; exploration work</a>
+    </div>
+    <div class="work-media clip-slot">
+      <span class="clip-kicker">Fleet exploration</span>
+      <video autoplay muted loop playsinline poster="media/warehouse-hero.jpg" aria-label="Timelapse of two robots exploring and mapping a fresh warehouse">
+        <source src="media/fleet-explore.mp4" type="video/mp4" />
+      </video>
+      <p class="clip-fallback">fleet exploration timelapse — see navigation.html for the frontier loop</p>
+    </div>
+  </section>
+
+  <section class="work" id="coordination">
+    <div class="work-copy">
+      <p class="kicker">Multi-robot coordination &amp; comms</p>
+      <h2>Only what they're told.</h2>
+      <p>The project's stated novel contribution. Autonomy never looks up a peer on the transform tree — that would work in simulation and be a lie about the real warehouse. Each robot broadcasts its position estimate, motion intent, task status and detected obstructions over a mesh radio; that broadcast is the <em>only</em> peer information any decision may use. Task allocation is decentralized and location-based; when two intents cross, the lower-priority robot yields. A central task manager stays in the loop for oversight and fallback.</p>
+      <ul class="facts">
+        <li>&lt;150 ms wireless · ~150 ms software e-stop</li>
+        <li>decentralized location-based allocation</li>
+        <li>no centralized path planning</li>
+      </ul>
+      <a class="more" href="coordination.html">How coordination &amp; the protocol work</a>
+    </div>
+    <div class="work-media">
+      <img src="media/poster.jpg" alt="A SortBots robot on the XLeRobot platform in the simulated warehouse" />
+    </div>
+  </section>
+
+  <section class="work" id="interfaces">
+    <div class="work-copy">
+      <p class="kicker">Interfaces, computer vision &amp; manipulation</p>
+      <h2>An operator, a camera, and two arms.</h2>
+      <p>A web dashboard (React) takes operator task input and shows live robot state, a fleet-radio monitor, and a scenarios console that starts and stops runs. Computer vision reads packages by ArUco marker and barcode, and classifies obstacles — person or other robot — with YOLO. At the shelf, arm control solves inverse kinematics (MoveIt&nbsp;2) for autonomous pick-and-place, docking a fixed offset short of the station.</p>
+      <ul class="facts">
+        <li>React dashboard · scenarios console</li>
+        <li>ArUco / barcode ID · YOLO obstacle class</li>
+        <li>MoveIt 2 IK pick-and-place</li>
+      </ul>
+      <a class="more" href="interfaces.html">How the interfaces, CV &amp; arms work</a>
+    </div>
+    <div class="work-media clip-slot">
+      <span class="clip-kicker">Dashboard</span>
+      <p class="clip-fallback">operator dashboard, marker read, and arm cycle — see interfaces.html</p>
+    </div>
+  </section>
+
+  <section class="work" id="architecture">
+    <div class="work-copy">
+      <p class="kicker">System architecture</p>
+      <h2>Hybrid: decentralized, with a net.</h2>
+      <p>Autonomy is decentralized — every robot runs its own full stack and coordinates only over the radio — but a central task manager provides global oversight and a fallback path. The repository is not a standard colcon workspace: nodes are loose scripts launched by path. Two simulator tracks never share a shell — Isaac Sim for mobility, SLAM and Nav2; ManiSkill / XLeRobot for arm manipulation.</p>
+      <ul class="facts">
+        <li>per-robot stack + fleet-shared merge nodes</li>
+        <li>central task manager for oversight / fallback</li>
+        <li>Isaac Sim ⋅ ManiSkill — isolated tracks</li>
+      </ul>
+      <a class="more" href="architecture.html">The full system architecture</a>
+    </div>
+    <div class="work-media clip-slot">
+      <span class="clip-kicker">ROS 2 graph</span>
+      <p class="clip-fallback">per-robot stack vs. fleet-shared nodes — diagrammed in architecture.html</p>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span>SortBots · project overview</span>
+    <span class="foot-links">
+      <a href="../../index.html">andre.dev</a>
+      <a href="https://github.com/andrearante12/SortBots">Repository</a>
+    </span>
+  </footer>
+
+  <script src="js/clip-slot.js"></script>
+</body>
+</html>

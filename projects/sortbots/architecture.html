@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>System architecture — SortBots — Andre Arante</title>
+  <meta name="description" content="SortBots' system architecture: a hybrid of fully decentralized per-robot autonomy with a central task manager for oversight and fallback, a fleet ROS 2 graph split into per-robot stacks and shared merge nodes, a loose-script repo layout, two isolated simulator tracks, and an exit-code control plane." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/portfolio.css" />
+  <script src="../../assets/theme.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="bar-left">
+      <a class="bar-home" href="../../index.html">← aa.dev</a>
+      <span class="sep">/</span>
+      <a class="brand" href="index.html">SortBots</a>
+    </div>
+    <nav aria-label="Subsystems">
+      <ul class="slots">
+        <li><a href="perception.html">Perception</a></li>
+        <li><a href="navigation.html">Navigation</a></li>
+        <li><a href="coordination.html">Coordination</a></li>
+        <li><a href="interfaces.html">Interfaces</a></li>
+        <li><a href="architecture.html" aria-current="page">Architecture</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="page page-wide">
+    <a class="back" href="index.html">← Overview</a>
+    <h1>Hybrid: decentralized, with a net.</h1>
+    <p class="lede">
+      Every robot runs its own full autonomy stack and coordinates only over the radio —
+      there is no central oracle in the control loop. A central task manager sits
+      <em>beside</em> that loop for global oversight and a fallback path, not inside it.
+    </p>
+
+    <h2>Per robot, and fleet-shared</h2>
+    <p>
+      The graph divides cleanly. Each robot owns a perception → SLAM → Nav2 chain and an
+      explorer. A small set of nodes runs once for the whole fleet: the 2D and 3D map
+      mergers, and the radio. Toggle the views:
+    </p>
+
+    <figure class="diagram">
+      <div class="routes">
+        <span class="routes-label">view</span>
+        <button type="button" class="route-btn" data-view="robot" aria-pressed="false">per robot</button>
+        <button type="button" class="route-btn" data-view="fleet" aria-pressed="false">fleet-shared</button>
+        <button type="button" class="route-btn is-on" data-view="all" aria-pressed="true">both</button>
+      </div>
+      <svg viewBox="0 0 1000 440" data-view="all" role="img" aria-label="Per-robot chain: head camera and IMU into the dynamic-obstacle filter into RTAB-Map into Nav2, with the explorer also driving Nav2. Fleet-shared: robot_0/map and robot_1/map into map_merge into the fused /map, which feeds both Nav2 and the explorer; the /fleet radio feeds the explorer.">
+        <defs>
+          <marker id="ar-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#0a84c4" />
+          </marker>
+          <marker id="ar-intent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#c9781f" />
+          </marker>
+        </defs>
+
+        <!-- edges: per robot -->
+        <path class="dg-edge" data-v="robot" d="M195 88 C 220 88, 220 88, 260 88" marker-end="url(#ar-data)" />
+        <path class="dg-edge" data-v="robot" d="M347 116 C 347 130, 347 130, 347 150" marker-end="url(#ar-data)" />
+        <path class="dg-edge dg-edge--intent" data-v="robot" d="M435 178 C 470 178, 470 178, 520 178" marker-end="url(#ar-intent)" />
+        <path class="dg-edge dg-edge--intent" data-v="robot" d="M607 116 C 607 140, 590 150, 570 158" marker-end="url(#ar-intent)" />
+
+        <!-- edges: fleet -->
+        <path class="dg-edge" data-v="fleet" d="M195 300 C 230 300, 230 312, 260 315" marker-end="url(#ar-data)" />
+        <path class="dg-edge" data-v="fleet" d="M195 360 C 230 360, 230 336, 260 327" marker-end="url(#ar-data)" />
+        <path class="dg-edge" data-v="fleet" d="M435 320 C 470 320, 490 320, 520 320" marker-end="url(#ar-data)" />
+        <path class="dg-edge dg-edge--intent" data-v="fleet" d="M785 300 C 720 300, 660 210, 620 194" marker-end="url(#ar-intent)" />
+
+        <!-- edges: shared spine (fused /map feeds Nav2 and explorer) -->
+        <path class="dg-edge" data-v="robot fleet" d="M607 292 C 607 240, 560 200, 470 186" marker-end="url(#ar-data)" />
+        <path class="dg-edge" data-v="robot fleet" d="M607 292 C 607 250, 600 200, 560 172" marker-end="url(#ar-data)" />
+
+        <!-- per-robot boxes -->
+        <g data-v="robot">
+          <rect class="dg-box dg-box--data" x="20" y="60" width="175" height="56" rx="10" />
+          <text class="dg-label" x="107" y="84" text-anchor="middle">Head RGB-D + IMU</text>
+          <text class="dg-sub" x="107" y="100" text-anchor="middle">per robot</text>
+        </g>
+        <g data-v="robot">
+          <rect class="dg-box" x="260" y="60" width="175" height="56" rx="10" />
+          <text class="dg-label" x="347" y="84" text-anchor="middle">dynamic_obstacle_filter</text>
+          <text class="dg-sub" x="347" y="100" text-anchor="middle">movers → NaN</text>
+        </g>
+        <g data-v="robot">
+          <rect class="dg-box" x="260" y="150" width="175" height="56" rx="10" />
+          <text class="dg-label" x="347" y="174" text-anchor="middle">RTAB-Map</text>
+          <text class="dg-sub" x="347" y="190" text-anchor="middle">SLAM, one per robot</text>
+        </g>
+        <g data-v="robot">
+          <rect class="dg-box dg-box--intent" x="520" y="150" width="175" height="56" rx="10" />
+          <text class="dg-label" x="607" y="174" text-anchor="middle">Nav2 + collision_monitor</text>
+          <text class="dg-sub" x="607" y="190" text-anchor="middle">MPPI · DiffDrive</text>
+        </g>
+        <g data-v="robot fleet">
+          <rect class="dg-box" x="520" y="60" width="175" height="56" rx="10" />
+          <text class="dg-label" x="607" y="84" text-anchor="middle">explorer</text>
+          <text class="dg-sub" x="607" y="100" text-anchor="middle">frontier goals</text>
+        </g>
+
+        <!-- fleet-shared boxes -->
+        <g data-v="fleet">
+          <rect class="dg-box dg-box--data" x="20" y="272" width="175" height="52" rx="10" />
+          <text class="dg-label" x="107" y="294" text-anchor="middle">robot_0/map</text>
+          <text class="dg-sub" x="107" y="310" text-anchor="middle">own database</text>
+        </g>
+        <g data-v="fleet">
+          <rect class="dg-box dg-box--data" x="20" y="336" width="175" height="52" rx="10" />
+          <text class="dg-label" x="107" y="358" text-anchor="middle">robot_1/map</text>
+          <text class="dg-sub" x="107" y="374" text-anchor="middle">own database</text>
+        </g>
+        <g data-v="fleet">
+          <rect class="dg-box" x="260" y="294" width="175" height="52" rx="10" />
+          <text class="dg-label" x="347" y="316" text-anchor="middle">map_merge</text>
+          <text class="dg-sub" x="347" y="332" text-anchor="middle">occupied &gt; free &gt; unknown</text>
+        </g>
+        <g data-v="robot fleet">
+          <rect class="dg-box" x="520" y="294" width="175" height="52" rx="10" />
+          <text class="dg-label" x="607" y="316" text-anchor="middle">/map</text>
+          <text class="dg-sub" x="607" y="332" text-anchor="middle">fused, world frame</text>
+        </g>
+        <g data-v="fleet">
+          <rect class="dg-box dg-box--intent" x="785" y="272" width="185" height="56" rx="10" />
+          <text class="dg-label" x="877" y="296" text-anchor="middle">/fleet/status + intent</text>
+          <text class="dg-sub" x="877" y="312" text-anchor="middle">mesh radio</text>
+        </g>
+      </svg>
+      <div class="dg-legend">
+        <span><i style="background:#0a84c4"></i>maps &amp; sensor data</span>
+        <span><i style="background:#c9781f"></i>intent &amp; commanded motion</span>
+      </div>
+      <figcaption>
+        Collaborative fusion, not collaborative SLAM: each robot owns its pose graph, and
+        the fleet shares only the merged <code>/map</code> (and a merged 3D
+        <code>/fleet/recon_cloud</code>, not shown). The explorer and Nav2 both plan
+        against the fused grid, so a robot uses space <em>any</em> robot has mapped.
+      </figcaption>
+    </figure>
+
+    <h2>Decentralized, with central oversight</h2>
+    <p>
+      The coordination layer is fully decentralized — no robot depends on a central
+      planner to move, and the fleet keeps working if the task manager drops. What the
+      central task manager adds is a global view: queue health, run oversight, and a
+      fallback allocation path when peer-to-peer coordination degrades. It shares the
+      single <code>navigate_to_pose</code> server with the explorer, so the two
+      arbitrate rather than fight.
+    </p>
+
+    <h2>Not a colcon workspace</h2>
+    <p>
+      The repository is deliberately not a standard robotics workspace. There are no
+      packages; every node is a loose script under <code>nodes/</code>, launched by path
+      from one bringup file. Tuning is plain YAML loaded by each node, not ROS params
+      (except Nav2, which keeps <code>configs/nav2_params.yaml</code>). Offline unit tests
+      import the ROS-free cores directly — <code>map_fuse.py</code>,
+      <code>recon_fuse.py</code>, the radio's encode/parse — so the fusion maths and the
+      protocol are testable in seconds with no sim.
+    </p>
+
+    <h2>Two simulator tracks</h2>
+    <p>
+      Isaac Sim and ROS 2 must never share a shell, and the two simulation tracks share
+      no code.
+    </p>
+    <div class="split">
+      <div class="card">
+        <h3>Isaac Sim — mobility</h3>
+        <ul>
+          <li>Warehouse scene, multi-robot spawn</li>
+          <li>RGB-D + IMU + odom into ROS 2</li>
+          <li>RTAB-Map SLAM, Nav2, exploration</li>
+          <li>NVIDIA packages (Nvblox)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>ManiSkill / XLeRobot — manipulation</h3>
+        <ul>
+          <li>ReplicaCAD apartment scene</li>
+          <li>Dual-arm control modes, teleop</li>
+          <li>Teleop dataset recording → imitation learning</li>
+          <li>Headless RGB / sensor rollouts for RL</li>
+        </ul>
+      </div>
+    </div>
+
+    <h2>The control plane</h2>
+    <p>
+      A console process outlives individual sim runs so the dashboard's Scenarios tab can
+      start and stop them. Everything the tab does is also one command through
+      <code>scripts/sim_ctl.sh</code>, with exit codes as the interface.
+    </p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>Code</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>0</td><td>success</td></tr>
+          <tr><td>1</td><td>command failed (bad scenario, rejected start, run went to failed)</td></tr>
+          <tr><td>3</td><td>no console running</td></tr>
+          <tr><td>4</td><td>no session running — how you ask "is anything running?"</td></tr>
+          <tr><td>124</td><td>timed out waiting for a phase</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="notes-head">Field notes</p>
+    <div class="note caution">
+      <span class="note-date">Diagnosed live · 2026-08-01</span>
+      <h4>Reliable image subscribers kill the simulator</h4>
+      <p>
+        Repeatedly subscribing to camera topics with reliable delivery — the default,
+        which an ad-hoc command-line subscription will happily do — silently kills the
+        simulator's image writers about two minutes into a run. The cameras just stop,
+        with no error. Every snapshot request must ask for sensor-data QoS explicitly.
+        Bisected live: Isaac alone is stable indefinitely; only the churn of reliable
+        snapshot subscriptions correlates with the death.
+      </p>
+    </div>
+    <div class="note">
+      <span class="note-date">Field note</span>
+      <h4>Measure speed in simulated time</h4>
+      <p>
+        The simulation runs at roughly 0.45× real time, and not consistently. Every speed
+        and duration figure in this project is measured against the simulated clock; a
+        wall-clock stopwatch reports numbers wrong by more than a factor of two.
+      </p>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>SortBots · system architecture</span>
+    <span class="foot-links">
+      <a href="index.html">Overview</a>
+      <a href="../../index.html">andre.dev</a>
+      <a href="https://github.com/andrearante12/SortBots">Repository</a>
+    </span>
+  </footer>
+
+  <script src="js/diagram-toggle.js"></script>
+</body>
+</html>

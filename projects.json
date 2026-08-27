@@ -66,6 +66,8 @@
     "category": "robotics",
     "icon": "robot",
     "github": "https://github.com/andrearante12/SortBots",
+    "site": "projects/sortbots/index.html",
+    "docs": "sortbots/index.html",
     "cardBlurb": "Senior capstone: a fleet of autonomous mobile robots built for collaborative delivery logistics in warehouse enviornments. Designed for rapid deployment in unmapped indoor spaces — building maps with RGB-D SLAM and splitting work through decentralized task allocation.",
     "cardTags": [
       "ROS2",

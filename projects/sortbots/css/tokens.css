@@ -1,0 +1,31 @@
+:root {
+  /* paper stack — shared verbatim with the MalmoRL + ImitationArm write-ups so
+     the three subsites read as siblings */
+  --limestone: #d8d2c4;
+  --paper: #efe9db;
+  --ink: #1c1a16;
+  --muted: #5c574e;
+  --line: rgba(28, 26, 22, 0.14);
+
+  /* console — dark chrome (nav bar, hero, code plates) in both themes */
+  --console: #12151a;
+  --console-2: #1a1e24;
+  --console-3: #2a2d32;
+  --hud: #c8d6e4;
+  --hud-dim: #7d8894;
+
+  /* accents. --accent (the blue already in projects.json) carries the site
+     identity; --data / --intent are *semantic* diagram colours carried over
+     from the SortBots repo's own docs site — cyan is what a sensor measured,
+     amber is what the planner intends. */
+  --accent: #4ea8de;
+  --accent-dim: #3a7fac;
+  --data: #0a84c4;
+  --intent: #c9781f;
+  --link: #2f6d99;
+
+  --font-display: "Bricolage Grotesque", "Segoe UI", sans-serif;
+  --font-body: "Source Serif 4", Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --max: 72rem;
+}

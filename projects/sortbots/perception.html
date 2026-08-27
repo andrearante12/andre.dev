@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Per-robot perception &amp; mapping — SortBots — Andre Arante</title>
+  <meta name="description" content="How each SortBots robot maps with one RGB-D camera: a dynamic-obstacle filter that keeps movers out of the permanent grid, RTAB-Map visual-inertial SLAM, the sensor suite, and the occupancy-grid tuning that gives frontier exploration something to chase." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/portfolio.css" />
+  <script src="../../assets/theme.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="bar-left">
+      <a class="bar-home" href="../../index.html">← aa.dev</a>
+      <span class="sep">/</span>
+      <a class="brand" href="index.html">SortBots</a>
+    </div>
+    <nav aria-label="Subsystems">
+      <ul class="slots">
+        <li><a href="perception.html" aria-current="page">Perception</a></li>
+        <li><a href="navigation.html">Navigation</a></li>
+        <li><a href="coordination.html">Coordination</a></li>
+        <li><a href="interfaces.html">Interfaces</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="page page-wide">
+    <a class="back" href="index.html">← Overview</a>
+    <h1>One camera, two kinds of truth.</h1>
+    <p class="lede">
+      There is no lidar. A single depth camera in each robot's head has to both map the
+      warehouse and notice what is moving in front of it — so the image is split into two
+      versions of reality, each sent to the consumer that wants it. <em>The map keeps the
+      building; the navigator keeps the traffic.</em>
+    </p>
+
+    <div class="stat-band">
+      <div><strong>1</strong><span>depth camera</span></div>
+      <div><strong>0</strong><span>lidars</span></div>
+      <div><strong>4.5 m</strong><span>usable range</span></div>
+      <div><strong>2</strong><span>output streams</span></div>
+    </div>
+
+    <figure class="diagram">
+      <svg viewBox="0 0 1000 320" role="img" aria-label="The head depth image enters dynamic_obstacle_filter, which emits depth_static (movers erased) to RTAB-Map and dynamic_obstacles (movers only) to the Nav2 costmaps.">
+        <defs>
+          <marker id="ar-data" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#0a84c4" />
+          </marker>
+          <marker id="ar-intent" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#c9781f" />
+          </marker>
+        </defs>
+        <path class="dg-edge" d="M195 159 C 235 159, 235 159, 250 159" marker-end="url(#ar-data)" />
+        <path class="dg-edge" d="M420 150 C 470 150, 470 75, 520 75" marker-end="url(#ar-data)" />
+        <path class="dg-edge" d="M420 172 C 470 172, 470 245, 520 245" marker-end="url(#ar-data)" />
+        <path class="dg-edge" d="M690 71 C 735 71, 735 71, 780 71" marker-end="url(#ar-data)" />
+        <path class="dg-edge dg-edge--intent" d="M690 245 C 735 245, 735 241, 780 241" marker-end="url(#ar-intent)" />
+
+        <g>
+          <rect class="dg-box dg-box--data" x="20" y="130" width="175" height="58" rx="10" />
+          <text class="dg-label" x="107" y="155" text-anchor="middle">camera/depth</text>
+          <text class="dg-sub" x="107" y="171" text-anchor="middle">RealSense D435</text>
+        </g>
+        <g>
+          <rect class="dg-box" x="250" y="130" width="170" height="58" rx="10" />
+          <text class="dg-label" x="335" y="152" text-anchor="middle">dynamic_obstacle_filter</text>
+          <text class="dg-sub" x="335" y="168" text-anchor="middle">frame diff + blob labelling</text>
+        </g>
+        <g>
+          <rect class="dg-box dg-box--data" x="520" y="46" width="170" height="58" rx="10" />
+          <text class="dg-label" x="605" y="70" text-anchor="middle">camera/depth_static</text>
+          <text class="dg-sub" x="605" y="86" text-anchor="middle">movers erased (NaN)</text>
+        </g>
+        <g>
+          <rect class="dg-box dg-box--data" x="520" y="216" width="170" height="58" rx="10" />
+          <text class="dg-label" x="605" y="240" text-anchor="middle">dynamic_obstacles</text>
+          <text class="dg-sub" x="605" y="256" text-anchor="middle">movers only, ephemeral</text>
+        </g>
+        <g>
+          <rect class="dg-box" x="780" y="46" width="170" height="58" rx="10" />
+          <text class="dg-label" x="865" y="70" text-anchor="middle">RTAB-Map</text>
+          <text class="dg-sub" x="865" y="86" text-anchor="middle">builds the map that persists</text>
+        </g>
+        <g>
+          <rect class="dg-box dg-box--intent" x="780" y="216" width="170" height="58" rx="10" />
+          <text class="dg-label" x="865" y="240" text-anchor="middle">Nav2 costmaps</text>
+          <text class="dg-sub" x="865" y="256" text-anchor="middle">clears as soon as they leave</text>
+        </g>
+      </svg>
+      <div class="dg-legend">
+        <span><i style="background:#0a84c4"></i>sensor data</span>
+        <span><i style="background:#c9781f"></i>intent &amp; commands</span>
+      </div>
+      <figcaption>One depth image in, two streams out. <code>dynamic_obstacle_filter</code> runs <em>before</em> RTAB-Map in the bringup, so <code>depth_static</code> already exists when mapping starts — and it is the only depth source the mapper is given.</figcaption>
+    </figure>
+
+    <h2>The sensor suite</h2>
+    <p>
+      Each robot fuses a forward RGB-D camera with inertial and odometric motion priors.
+      RTAB-Map runs with visual odometry off — it consumes the wheel/odometry
+      <code>odom → base_link</code> transform as its motion model and waits for the first
+      IMU sample before it starts.
+    </p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>Sensor</th><th>Part</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>RGB-D camera</td><td>Intel RealSense D435</td><td>depth + colour for SLAM and the Nav2 costmaps</td></tr>
+          <tr><td>IMU</td><td>MPU-6050 class</td><td>orientation prior; RTAB-Map blocks on the first sample</td></tr>
+          <tr><td>Optical odometry</td><td>PAA5160E1 tracking sensor</td><td>ground-plane translation estimate</td></tr>
+          <tr><td>Wheel encoders</td><td>drive base</td><td><code>odom</code> and the <code>odom → base_link</code> TF</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      TF frames are prefixed per robot (<code>robot_0/base_link</code>, …) on the shared
+      <code>/tf</code>. Autonomy must never look up another robot's frame there — that
+      would be a pose oracle. The coordination radio is the only channel for peer state.
+    </p>
+
+    <h2>The dynamic-obstacle filter</h2>
+    <p>
+      <code>dynamic_obstacle_filter</code> detects movers by frame-to-frame depth change,
+      closes speckle with a morphological pass, and keeps robot-sized blobs. It is
+      vision-only — no peer TF. Mover pixels are written to NaN in a re-encoded 32FC1
+      image so they are never painted into SLAM; the same blobs are published separately
+      as an ephemeral point cloud for a Nav2 obstacle layer that clears the instant they
+      leave the frustum.
+    </p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>Key</th><th>Value</th><th>Controls</th></tr></thead>
+        <tbody>
+          <tr><td>change_m</td><td>0.12</td><td>depth delta between frames that counts as motion</td></tr>
+          <tr><td>min/max_range_m</td><td>0.35 / 4.5</td><td>range band outside which depth is ignored</td></tr>
+          <tr><td>min/max_blob_px</td><td>40 / 25000</td><td>blob sizes kept as real movers</td></tr>
+          <tr><td>morph_close</td><td>2</td><td>dilate/erode passes that close speckle holes</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Occupancy-grid tuning</h2>
+    <p>
+      Frontier exploration is literally "a free cell adjacent to an unknown cell" — with
+      no believable free space there is nothing to explore toward. Ray tracing is the
+      load-bearing setting: without it the only cells marked free are ones where a depth
+      point happened to land on the floor, and <code>/map</code> stays overwhelmingly
+      unknown even in rooms a robot drove straight through.
+    </p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>Parameter</th><th>Value</th><th>Why</th></tr></thead>
+        <tbody>
+          <tr><td>Grid/RayTracing</td><td>true</td><td>marks free space the camera swept, not just where a point landed</td></tr>
+          <tr><td>Grid/3D</td><td>true</td><td>makes <code>cloud_map</code> real 3D geometry, not a 15 cm pancake — the dashboard's 3D panel depends on it</td></tr>
+          <tr><td>Grid/RangeMax</td><td>5.0 m</td><td>matches the costmap raytrace range; bounds the per-node volume cost of 3D</td></tr>
+          <tr><td>GridGlobal/ProbHit&nbsp;/&nbsp;ProbMiss</td><td>0.8 / 0.45</td><td>reweighted — 3D ray tracing floods far more free evidence into the projected 2D grid than the defaults expect</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      Measured on the primitive scene after ~80 s of driving: <b>52.9 m² free, 54.8% of
+      the grid</b>, versus a near-empty map before the tuning.
+    </p>
+
+    <p class="notes-head">Field notes</p>
+    <div class="note">
+      <span class="note-date">Diagnosed live · 2026-08-09</span>
+      <h4>The blob labeller that blinded both costmaps</h4>
+      <p>
+        Connected-component labelling started as a per-pixel flood fill: at 848×480 that
+        is ~407,000 interpreted iterations per frame, which throttled
+        <code>depth_static</code> to about 0.3 Hz. The knock-on was the expensive part —
+        <code>depth_image_proc</code> keeps a <code>camera_info</code> queue only five
+        messages deep, so it never synced an image/info pair, published no point cloud,
+        and left <em>both</em> costmaps and the collision monitor with no obstacle data.
+        Rewritten as row-runs plus union-find, with blob sizes from one
+        <code>bincount</code> over run lengths.
+      </p>
+    </div>
+    <div class="note">
+      <span class="note-date">Diagnosed live · 2026-08-01</span>
+      <h4>Free space floods the map when ray tracing is on</h4>
+      <p>
+        Turning on 3D ray tracing pushed far more "this cell is empty" evidence into the
+        projected 2D grid than the hit/miss probabilities were tuned for. Reweighting
+        <code>ProbHit/ProbMiss</code> from 0.7/0.4 to 0.8/0.45 took occupied cells from
+        7,361 down to 659 while free space roughly doubled.
+      </p>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>SortBots · perception &amp; mapping</span>
+    <span class="foot-links">
+      <a href="index.html">Overview</a>
+      <a href="../../index.html">andre.dev</a>
+      <a href="https://github.com/andrearante12/SortBots">Repository</a>
+    </span>
+  </footer>
+</body>
+</html>

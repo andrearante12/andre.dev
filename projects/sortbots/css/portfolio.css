@@ -1,0 +1,125 @@
+/* ─────────────────────────────────────────────────────────────
+   Portfolio integration layer for the SortBots write-up.
+
+   Loaded AFTER css/site.css on every page here. Same treatment as
+   projects/minecraft/css/portfolio.css and
+   projects/imitationarm/css/portfolio.css — the three write-ups are
+   siblings and behave identically:
+
+   1. A dark theme. The portfolio ships dark ⇄ cream and remembers the
+      choice (assets/theme.js writes data-theme on <html>), so a visitor
+      arriving from a dark portfolio must not be flashed a cream page.
+      Done purely by re-pointing the paper tokens in tokens.css — the
+      console surfaces (nav bar, hero, .code-block) are dark by design in
+      both themes and are left alone, so the two themes share one layout.
+   2. The shared chrome: the aa.dev back-link and the theme toggle that
+      assets/theme.js injects into the bar.
+
+   assets/theme.css is deliberately NOT loaded here (its bare nav/footer
+   selectors would bleed into this chrome); the toggle is restyled below.
+   ───────────────────────────────────────────────────────────── */
+
+:root[data-theme="dark"] {
+  --limestone: #12100c;          /* page — warm near-black, matches index.html */
+  --paper: #1b1813;              /* raised surface, one step up */
+  --ink: #f1eadf;
+  --muted: #b0a493;
+  --line: rgba(241, 234, 223, 0.13);
+  --link: #7fbfe4;               /* links need lift on a dark ground */
+  --accent-dim: #4ea8de;         /* kickers/labels: use the bright accent */
+  color-scheme: dark;
+}
+
+/* The bar and the hero are console-dark in both themes; on the dark theme
+   they would otherwise dissolve into the page. Nudge them apart. */
+:root[data-theme="dark"] .bar { background: #0b0c0e; border-bottom-color: #20242a; }
+:root[data-theme="dark"] .hero { background: #0d0f12; }
+:root[data-theme="dark"] .slots a {
+  background: #1e232a;
+  border-color: #0d0f12;
+  box-shadow: inset 1px 1px 0 #333a43, inset -1px -1px 0 #0c0e11;
+}
+/* re-assert the pressed state — the rule above outranks it on specificity */
+:root[data-theme="dark"] .slots a:hover,
+:root[data-theme="dark"] .slots a[aria-current="page"] {
+  color: #0d0f12;
+  background: var(--accent);
+  border-color: #2f5f7d;
+  box-shadow: inset 1px 1px 0 #b9e0f6, inset -1px -1px 0 #2f6d92;
+}
+
+/* .diagram wraps SVGs drawn with dark strokes on transparent: on the dark
+   theme they need a light plate to sit on, not a dark one. So the plate
+   stays cream and its caption must follow. */
+:root[data-theme="dark"] .diagram { background: #e7e1d3; border-color: #2b2620; }
+:root[data-theme="dark"] .diagram figcaption,
+:root[data-theme="dark"] .diagram .dg-legend span { color: #5c574e; }
+:root[data-theme="dark"] .diagram .route-btn { color: #5c574e; background: #fdfbf6; }
+:root[data-theme="dark"] .diagram .routes-label { color: #5c574e; }
+
+/* The scrubber renders occupancy PNGs (dark cells on white) — keep its stage
+   cream in both themes so swept free space stays visible. */
+:root[data-theme="dark"] .scrubber-stage { background: #e7e1d3; border-color: #2b2620; }
+
+/* .work-media / .facts / .card / .stat-band / .spec ride on --paper, handled
+   by the token swap; only the video letterbox is hardcoded. */
+:root[data-theme="dark"] .work-media { border-color: var(--line); }
+
+/* ── shared chrome: back-link + theme toggle in the bar ── */
+
+.bar-left {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  min-width: 0;
+}
+
+.bar-home {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--hud-dim);
+  text-decoration: none;
+  white-space: nowrap;
+}
+.bar-home:hover { color: var(--accent); }
+
+.bar-left .sep {
+  color: #454b54;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+/* assets/theme.js finds no .nav-links here, so it wraps the slots list and
+   the button together in .nav-right and appends that to <nav>. */
+.bar .nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bar .theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.6rem;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: #c2ccd6;
+  background: transparent;
+  border: 1px solid #3a4048;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.bar .theme-toggle:hover { color: var(--accent); border-color: var(--accent-dim); }
+.bar .theme-toggle svg { width: 13px; height: 13px; display: block; flex-shrink: 0; }
+
+@media (max-width: 820px) {
+  .bar { flex-wrap: wrap; row-gap: 0.5rem; }
+  .bar .theme-toggle .tt-label { display: none; }
+  .bar .theme-toggle { padding: 0.4rem 0.45rem; }
+}

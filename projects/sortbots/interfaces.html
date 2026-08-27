@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Interfaces, computer vision &amp; manipulation — SortBots — Andre Arante</title>
+  <meta name="description" content="The operator-facing and end-effector layers of SortBots: a React dashboard with a scenarios console and fleet-radio monitor, package identification by ArUco marker and barcode, YOLO obstacle classification, and MoveIt 2 inverse-kinematics pick-and-place." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700&family=IBM+Plex+Mono:wght@400;500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/site.css" />
+  <link rel="stylesheet" href="css/portfolio.css" />
+  <script src="../../assets/theme.js"></script>
+</head>
+<body>
+  <header class="bar">
+    <div class="bar-left">
+      <a class="bar-home" href="../../index.html">← aa.dev</a>
+      <span class="sep">/</span>
+      <a class="brand" href="index.html">SortBots</a>
+    </div>
+    <nav aria-label="Subsystems">
+      <ul class="slots">
+        <li><a href="perception.html">Perception</a></li>
+        <li><a href="navigation.html">Navigation</a></li>
+        <li><a href="coordination.html">Coordination</a></li>
+        <li><a href="interfaces.html" aria-current="page">Interfaces</a></li>
+        <li><a href="architecture.html">Architecture</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main class="page page-wide">
+    <a class="back" href="index.html">← Overview</a>
+    <h1>An operator, a camera, and two arms.</h1>
+    <p class="lede">
+      Between the autonomy stack and the world sit three things a person actually touches
+      or sees: the dashboard an operator drives the fleet from, the vision that reads a
+      package and names an obstacle, and the arms that lift the box off the shelf.
+    </p>
+
+    <div class="stat-band">
+      <div><strong>3</strong><span>dashboard tabs</span></div>
+      <div><strong>2</strong><span>CV jobs — ID + classify</span></div>
+      <div><strong>6</strong><span>arm joints commanded</span></div>
+      <div><strong>~0.45 m</strong><span>arm reach</span></div>
+    </div>
+
+    <h2>The dashboard</h2>
+    <p>
+      A React web GUI is the operator's whole interface to the fleet. It takes task
+      input — pickup and dropoff, dispatched into the shared queue — and shows live robot
+      state: camera feeds, the fused 2D map with Nav2 path and costmap overlays, and the
+      3D reconstruction. It is served over plain HTTP on the private tailnet so a phone
+      on the same network can drive it.
+    </p>
+    <div class="split">
+      <div class="card">
+        <h3>Live</h3>
+        <ul>
+          <li>Chase / head cameras, fused map, 3D fleet recon</li>
+          <li>Drive pad + click-to-navigate</li>
+          <li>Dispatch form + task queue</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Fleet</h3>
+        <ul>
+          <li>Monitors <code>/fleet/status</code> + <code>/fleet/intent</code></li>
+          <li>Per-robot status cards, intent log, radio trace</li>
+          <li>Peer markers from the radio, not TF</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Scenarios</h3>
+        <ul>
+          <li>Start / stop sim runs over an HTTP control API</li>
+          <li>Presets in <code>configs/scenarios/</code> (YAML)</li>
+          <li>Streams the launcher output into the tab</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Without a console</h3>
+        <ul>
+          <li>Scenarios tab goes read-only</li>
+          <li>Lists what exists, explains how to start</li>
+          <li>No buttons that can't work</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      A headless control plane mirrors every dashboard action:
+      <code>scripts/sim_ctl.sh {console start | list | start | wait | status | stop}</code>,
+      with exit codes as the interface, so automation and coding agents drive the same
+      operations without hand-writing JSON.
+    </p>
+
+    <h2>Computer vision</h2>
+    <p>
+      Two jobs, both on the head camera. <b>Package identification</b> reads an ArUco
+      marker or a barcode on the box to resolve which item and which destination — the
+      link between a physical package and a queue entry. <b>Obstacle classification</b>
+      runs YOLO on the RGB frame to label what the depth camera already flagged as a
+      mover: <em>person</em> or <em>other robot</em>. The class changes the response — a
+      person gets a wider berth and a longer clear-timeout than a peer robot, which the
+      radio already accounts for.
+    </p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>Task</th><th>Method</th><th>Consumes / produces</th></tr></thead>
+        <tbody>
+          <tr><td>Package ID</td><td>ArUco marker + barcode decode</td><td>box in view → item id, destination station</td></tr>
+          <tr><td>Obstacle class</td><td>YOLO on the RGB frame</td><td>mover blob → {person, robot, unknown} + confidence</td></tr>
+          <tr><td>Fusion with depth</td><td>project class onto the depth blob</td><td>labelled dynamic obstacle for Nav2 + the radio</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>Manipulation</h2>
+    <p>
+      Two arms, six joints. Getting to the shelf is a navigation problem; at the station,
+      arm control solves inverse kinematics with MoveIt&nbsp;2 for an autonomous
+      pick-and-place. The robot docks a fixed offset short of the deck and slightly
+      off-centre — the arm is mounted a few centimetres off the chassis centreline — so
+      the reach envelope lines up with the shelf face.
+    </p>
+    <div class="table-wrap">
+      <table class="spec">
+        <thead><tr><th>Key</th><th>Value</th><th>Derivation</th></tr></thead>
+        <tbody>
+          <tr><td>shoulder height</td><td>0.83 m</td><td>from the XLeRobot platform</td></tr>
+          <tr><td>reach</td><td>~0.45 m</td><td>arm kinematics</td></tr>
+          <tr><td>deck_height_m</td><td>0.68</td><td>reach forward and slightly down from the shoulder</td></tr>
+          <tr><td>dock_offset_m</td><td>0.30</td><td>horizontal reach at that height is √(0.45² − 0.15²) ≈ 0.42 m</td></tr>
+          <tr><td>dock_lateral_m</td><td>offset +90° from facing</td><td>arm mounted 0.045 m off the chassis centreline</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p>
+      The pick sequence — stow, approach, descend, close, attach, lift, carry — is
+      streamed as joint commands at 20 Hz. <code>task_manager</code> requests a pick, the
+      arm controller drives the joints and signals a simulated grasp, and reports
+      <code>picked</code> / <code>placed</code> / <code>failed</code> back to the queue.
+    </p>
+
+    <p class="notes-head">Field notes</p>
+    <div class="note">
+      <span class="note-date">Field note</span>
+      <h4>A top-level import that made the node unlaunchable</h4>
+      <p>
+        The arm node imported the IK backend at module scope. That dependency only exists
+        in the manipulation project's separate environment, so in the mobility
+        environment the import failed instantly and <em>no launch file could ever start
+        the node</em>. Nothing was subscribed to pick requests, so every dispatched task
+        sat in the picking state until it timed out, with no error pointing at the cause.
+        The solver now lives behind a flag with lazy imports.
+      </p>
+    </div>
+    <div class="note caution">
+      <span class="note-date">Field note</span>
+      <h4>Joint limits are a hint to the solver, not a constraint</h4>
+      <p>
+        The IK library accepts joint limits but treats them as a suggestion — it returned
+        a 4.33 rad solution for a joint whose range ends at 3.45. Every solution is
+        re-checked against the limits on the caller's side before it is accepted.
+      </p>
+    </div>
+  </main>
+
+  <footer class="foot">
+    <span>SortBots · interfaces, CV &amp; manipulation</span>
+    <span class="foot-links">
+      <a href="index.html">Overview</a>
+      <a href="../../index.html">andre.dev</a>
+      <a href="https://github.com/andrearante12/SortBots">Repository</a>
+    </span>
+  </footer>
+</body>
+</html>
